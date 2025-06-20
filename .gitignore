@@ -1,0 +1,38 @@
+# Build results
+bin/
+obj/
+
+# User-specific files
+*.user
+*.userosscache
+*.suo
+
+# Visual Studio Code settings
+.vscode/
+
+# Logs
+*.log
+
+# OS generated files
+.DS_Store
+Thumbs.db
+
+# ASP.NET temporary files
+*.vspscc
+*.vssscc
+
+# Rider project files
+.idea/
+
+# Auto-generated files
+*.swp
+
+# Configuration
+appsettings.Development.json
+
+# Dotnet generated files
+*.dbmdl
+*.jfm
+
+# Other
+*.sln.docstates
