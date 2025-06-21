@@ -9,7 +9,7 @@ namespace ChessEngine
             bp = 7, bN = 8, bB = 9, bR = 10, bQ = 11, bK = 12
         }
         //10 x 12 board representation instead of 8 x 8
-        public const int BRD_SQ_NuUM = 120;
+        public const int BRD_SQ_NUM = 120;
 
         // RANK_NONE and FILE_NONE are used to indicate “no valid rank or file,” 
         // to help handle invalid or off-board squares safely in the engine.
@@ -46,6 +46,13 @@ namespace ChessEngine
         {
             public const int FALSE = 0;
             public const int TRUE = 1;
+        }
+
+
+        //function to get square index
+        public static int getSquareIndex(int file, int rank)
+        {
+            return file + 21 + (rank * 10);
         }
 
     }    
