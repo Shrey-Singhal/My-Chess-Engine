@@ -30,6 +30,14 @@ namespace ChessEngine
             WHITE = 0, BLACK = 1, BOTH = 2
         }
 
+        public enum CASTLEBIT
+        {
+            WKCA = 1,  //0001
+            WQCA = 2, //0010
+            BKCA = 4, //0100
+            BQCA = 8  //1000
+        }
+
         // NO_SQ = -1 means “no valid square” — used in code to signal that a square doesn’t exist.
         // OFFBOARD = 100 marks squares outside the playable board in the 10×12 array, helping detect invalid moves.
 
@@ -55,6 +63,36 @@ namespace ChessEngine
             return file + 21 + (rank * 10);
         }
 
-    }    
 
+        public static class Board
+        {
+            // these 2 lists contain file index and rank index for each square
+            public static int[] FilesBrd = new int[BRD_SQ_NUM];
+            public static int[] RanksBrd = new int[BRD_SQ_NUM];
+
+            public static void InitFilesRanksBoard()
+            {
+
+                for (int i = 0; i < BRD_SQ_NUM; ++i)
+                {
+                    FilesBrd[i] = Squares.OFFBOARD;
+                    RanksBrd[i] = Squares.OFFBOARD;
+                }
+
+                for (int rank = 0; rank < 8; ++rank)
+                {
+                    for (int file = 0; file < 8; ++file)
+                    {
+                        int sq = getSquareIndex(file, rank);
+                        FilesBrd[sq] = file;
+                        RanksBrd[sq] = rank;
+
+                    }
+                }
+            }
+
+
+
+        }
+    }
 }
