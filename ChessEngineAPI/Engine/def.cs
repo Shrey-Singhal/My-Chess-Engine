@@ -1,4 +1,6 @@
 namespace ChessEngine
+
+// all enums, lists, constants, conversion tables, helper functions
 {
     public static class Defs
     {
@@ -8,8 +10,6 @@ namespace ChessEngine
             wP = 1, wN = 2, wB = 3, wR = 4, wQ = 5, wK = 6,
             bp = 7, bN = 8, bB = 9, bR = 10, bQ = 11, bK = 12
         }
-        //10 x 12 board representation instead of 8 x 8
-        public const int BRD_SQ_NUM = 120;
 
         // RANK_NONE and FILE_NONE are used to indicate “no valid rank or file,” 
         // to help handle invalid or off-board squares safely in the engine.
@@ -42,7 +42,6 @@ namespace ChessEngine
 
         // NO_SQ = -1 means “no valid square” — used in code to signal that a square doesn’t exist.
         // OFFBOARD = 100 marks squares outside the playable board in the 10×12 array, helping detect invalid moves.
-
         public static class Squares
         {
             public const int A1 = 21, B1 = 22, C1 = 23, D1 = 24, E1 = 25, F1 = 26, G1 = 27, H1 = 28;
@@ -57,7 +56,42 @@ namespace ChessEngine
             public const int FALSE = 0;
             public const int TRUE = 1;
         }
+        
+        //10 x 12 board representation instead of 8 x 8
+        public const int BRD_SQ_NUM = 120;
 
+        // these 2 lists contain file index and rank index for each square
+        public static int[] FilesBrd = new int[BRD_SQ_NUM];
+        public static int[] RanksBrd = new int[BRD_SQ_NUM];
+
+        public static void InitFilesRanksBoard()
+        {
+
+            for (int i = 0; i < BRD_SQ_NUM; ++i)
+            {
+                FilesBrd[i] = Squares.OFFBOARD;
+                RanksBrd[i] = Squares.OFFBOARD;
+            }
+
+            for (int rank = 0; rank < 8; ++rank)
+            {
+                for (int file = 0; file < 8; ++file)
+                {
+                    int sq = getSquareIndex(file, rank);
+                    FilesBrd[sq] = file;
+                    RanksBrd[sq] = rank;
+
+                }
+            }
+        }
+        
+        private static Random rand = new Random();
+        public static ulong Rand64()
+        {
+            ulong r1 = (ulong)rand.Next(0, int.MaxValue);
+            ulong r2 = (ulong)rand.Next(0, int.MaxValue);
+            return (r1 << 32) | r2;
+        }
 
         //function to get square index
         public static int getSquareIndex(int file, int rank)
@@ -65,41 +99,45 @@ namespace ChessEngine
             return file + 21 + (rank * 10);
         }
 
+        // the arrays and functions below help you to convert between 64 square board index and
+        // 120 square board index.
+        public static int[] Sq120ToSq64 = new int[BRD_SQ_NUM];
+        public static int[] Sq64ToSq120 = new int[64];
 
-        public static class Board
+        public static void InitSq120To64()
         {
-            // these 2 lists contain file index and rank index for each square
-            public static int[] FilesBrd = new int[BRD_SQ_NUM];
-            public static int[] RanksBrd = new int[BRD_SQ_NUM];
-
-            public static void InitFilesRanksBoard()
+            // setting defaults like 65 and 120 help catch bugs early and prevent undefined behaviour
+            for (int i = 0; i < 120; ++i)
             {
-
-                for (int i = 0; i < BRD_SQ_NUM; ++i)
-                {
-                    FilesBrd[i] = Squares.OFFBOARD;
-                    RanksBrd[i] = Squares.OFFBOARD;
-                }
-
-                for (int rank = 0; rank < 8; ++rank)
-                {
-                    for (int file = 0; file < 8; ++file)
-                    {
-                        int sq = getSquareIndex(file, rank);
-                        FilesBrd[sq] = file;
-                        RanksBrd[sq] = rank;
-
-                    }
-                }
+                Sq120ToSq64[i] = 65; // default: not on 8x8 board
             }
 
+            for (int i = 0; i < 64; ++i)
+            {
+                Sq64ToSq120[i] = 120; // default: invalid
+            }
+
+            int sq64 = 0;
+            for (int rank = (int)Ranks.RANK_1; rank <= (int)Ranks.RANK_8; ++rank)
+            {
+                for (int file = (int)Files.FILE_A; file <= (int)Files.FILE_H; ++file)
+                {
+                    int sq120 = getSquareIndex(file, rank);
+                    Sq64ToSq120[sq64] = sq120;
+                    Sq120ToSq64[sq120] = sq64;
+                    sq64++;
+                }
+            }
         }
-        private static Random rand = new Random();
-        public static ulong Rand64()
+
+        public static int SQ64(int sq120)
         {
-            ulong r1 = (ulong)rand.Next(0, int.MaxValue);
-            ulong r2 = (ulong)rand.Next(0, int.MaxValue);
-            return (r1 << 32) | r2;
+            return Sq120ToSq64[sq120];
+        }
+
+        public static int SQ120(int sq64)
+        {
+            return Sq64ToSq120[sq64];
         }
 
 

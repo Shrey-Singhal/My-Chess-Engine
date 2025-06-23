@@ -7,9 +7,12 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-Defs.Board.InitFilesRanksBoard();
+Defs.InitFilesRanksBoard();
+Defs.InitSq120To64();
+
 Gameboard board = new Gameboard();
 board.InitHashKeys();
+board.posKey = board.GeneratePosKey();
 
 var app = builder.Build();
 

@@ -62,9 +62,7 @@ namespace ChessEngine
         // Now you have true 64-bit random numbers for each piece-square, castling, and side. 
         public void InitHashKeys()
         {
-            int index = 0;
-
-            for (int i = 0; index < 14 * 120; ++i)
+            for (int i = 0; i < 14 * 120; ++i)
             {
                 PieceKeys[i] = Defs.Rand64();
             }
