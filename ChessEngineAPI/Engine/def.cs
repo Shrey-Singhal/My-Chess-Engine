@@ -24,7 +24,7 @@ namespace ChessEngine
             RANK_1 = 0, RANK_2 = 1, RANK_3 = 2, RANK_4 = 3, RANK_5 = 4, RANK_6 = 5,
             RANK_7 = 6, RANK_8 = 7, RANK_NONE = 8
         }
-        
+
         //WHITE / BLACK → real piece, belongs to a player
         //BOTH → no owner, used for EMPTY or OFFBOARD
         public enum Colours
@@ -93,8 +93,15 @@ namespace ChessEngine
                 }
             }
 
-
-
         }
+        private static Random rand = new Random();
+        public static ulong Rand64()
+        {
+            ulong r1 = (ulong)rand.Next(0, int.MaxValue);
+            ulong r2 = (ulong)rand.Next(0, int.MaxValue);
+            return (r1 << 32) | r2;
+        }
+
+
     }
 }

@@ -8,6 +8,8 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 Defs.Board.InitFilesRanksBoard();
+Gameboard board = new Gameboard();
+board.InitHashKeys();
 
 var app = builder.Build();
 
