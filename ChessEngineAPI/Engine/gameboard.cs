@@ -154,6 +154,101 @@ namespace ChessEngine
             // 7. Reset move list start for this ply
             moveListStart[ply] = 0;
         }
+
+        public void ParseFEN(string fen)
+
+        // example FEN - rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1
+        {
+            ResetBoard();
+
+            int rank = (int)Defs.Ranks.RANK_8;
+            int file = (int)Defs.Files.FILE_A;
+            int piece;
+            int count; // this is for handling digits in the fen string that represent empyty squares
+            int sq120;
+            int fenCnt = 0; // pointer for the FEN string
+
+            while (rank >= (int)Defs.Ranks.RANK_1 && fenCnt < fen.Length)
+            {
+                count = 1;
+
+                switch (fen[fenCnt])
+                {
+                    case 'p': piece = (int)Defs.Pieces.bp; break;
+                    case 'r': piece = (int)Defs.Pieces.bR; break;
+                    case 'n': piece = (int)Defs.Pieces.bN; break;
+                    case 'b': piece = (int)Defs.Pieces.bB; break;
+                    case 'k': piece = (int)Defs.Pieces.bK; break;
+                    case 'q': piece = (int)Defs.Pieces.bQ; break;
+                    case 'P': piece = (int)Defs.Pieces.wP; break;
+                    case 'R': piece = (int)Defs.Pieces.wR; break;
+                    case 'N': piece = (int)Defs.Pieces.wN; break;
+                    case 'B': piece = (int)Defs.Pieces.wB; break;
+                    case 'K': piece = (int)Defs.Pieces.wK; break;
+                    case 'Q': piece = (int)Defs.Pieces.wQ; break;
+
+                    case '1': case '2': case '3': case '4':
+                    case '5': case '6': case '7': case '8':
+                        piece = (int)Defs.Pieces.EMPTY;
+                        // converting digit char to no.
+                        // ASCII value of 0 is 48. if the fen[fenCnt] was 3 then ASCII val would be 51
+                        // so 51 - 48 would be 3. Hence, this is how you get convert char to no.
+                        count = fen[fenCnt] - '0';
+                        break;
+
+                    case '/':
+                    case ' ':
+                        rank--;
+                        file = (int)Defs.Files.FILE_A;
+                        fenCnt++;
+                        continue;
+
+                    default:
+                        throw new Exception("FEN error");
+                }
+
+                for (int i = 0; i < count; i++)
+                {
+                    sq120 = Defs.getSquareIndex(file, rank);
+                    pieces[sq120] = piece;
+                    file++;
+                }
+                fenCnt++;
+            }
+
+            // done with the piece placement. read side to move. 
+            side = (fen[fenCnt] == 'w') ? Defs.Colours.WHITE : Defs.Colours.BLACK;
+            fenCnt += 2;
+
+            // read castling rights
+            for (int i = 0; i < 4; i++)
+            {
+                if (fen[fenCnt] == ' ')
+                    break;
+
+                switch (fen[fenCnt])
+                // |= is bitwise OR + assignment
+                // bcz enum is just an int under the hood you can do bitwise operations on it
+                {
+                    case 'K': castlePerm |= Defs.CASTLEBIT.WKCA; break;
+                    case 'Q': castlePerm |= Defs.CASTLEBIT.WQCA; break;
+                    case 'k': castlePerm |= Defs.CASTLEBIT.BKCA; break;
+                    case 'q': castlePerm |= Defs.CASTLEBIT.BQCA; break;
+                }
+                fenCnt++;
+            }
+            fenCnt++;
+
+            // read en passant square
+            if (fen[fenCnt] != '-')
+            {
+                file = fen[fenCnt] - 'a';
+                rank = fen[fenCnt + 1] - '1';
+                enPas = Defs.getSquareIndex(file, rank);
+            }
+
+            posKey = GeneratePosKey();  // build new zorbist hash for the board.
+        }
     }
 
     

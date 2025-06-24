@@ -56,6 +56,10 @@ namespace ChessEngine
             public const int FALSE = 0;
             public const int TRUE = 1;
         }
+
+        public static int MAXGAMEMOVES = 2048;
+        public static int MAXPOSITIONMOVES = 256;
+        public static int MAXDEPTH = 64;
         
         //10 x 12 board representation instead of 8 x 8
         public const int BRD_SQ_NUM = 120;
