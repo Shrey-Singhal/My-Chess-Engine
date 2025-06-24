@@ -14,7 +14,7 @@ namespace ChessEngine
         // position to find the best move
         public int ply;
         public Defs.CASTLEBIT castlePerm; // track which side can castle legally
-        public int[] material = new int[2];
+        public int[] material = new int[2]; // total material value for black and white
         public int[] pceNum = new int[13];
 
         // pList is a piece list — it keeps track of where every piece is on the board, organized by piece type.
@@ -43,6 +43,12 @@ namespace ChessEngine
 
         // random number for who's turn it is.
         public ulong SideKey;
+
+
+        public int[] moveList = new int[Defs.MAXDEPTH * Defs.MAXPOSITIONMOVES];
+        public int[] moveScores = new int[Defs.MAXDEPTH * Defs.MAXPOSITIONMOVES];
+        public int[] moveListStart = new int[Defs.MAXDEPTH];
+
         public Gameboard()
         {
             side = Defs.Colours.WHITE;
@@ -102,6 +108,51 @@ namespace ChessEngine
             finalKey ^= CastleKeys[(int)castlePerm];
 
             return finalKey;
+        }
+
+        public void ResetBoard()
+        {
+            // 1. Set all 120 squares to OFFBOARD
+            for (int i = 0; i < Defs.BRD_SQ_NUM; ++i)
+            {
+                pieces[i] = Defs.Squares.OFFBOARD;
+            }
+
+            // 2. Set real 64 squares to EMPTY
+            for (int i = 0; i < 64; ++i)
+            {
+                pieces[Defs.SQ120(i)] = (int)Defs.Pieces.EMPTY;
+            }
+
+            // 3. Clear piece list
+            for (int i = 0; i < 14 * 10; ++i)
+            {
+                pList[i] = (int)Defs.Pieces.EMPTY;
+            }
+
+            // 4. Reset material scores (white, black)
+            for (int i = 0; i < 2; ++i)
+            {
+                material[i] = 0;
+            }
+
+            // 5. Reset piece counts
+            for (int i = 0; i < 13; ++i)
+            {
+                pceNum[i] = 0;
+            }
+
+            // 6. Reset other board info
+            side = Defs.Colours.BOTH;
+            enPas = Defs.Squares.NO_SQ;
+            fiftyMove = 0;
+            ply = 0;
+            hisPly = 0;
+            castlePerm = 0;
+            posKey = 0;
+
+            // 7. Reset move list start for this ply
+            moveListStart[ply] = 0;
         }
     }
 
