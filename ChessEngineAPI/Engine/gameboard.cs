@@ -187,8 +187,14 @@ namespace ChessEngine
                     case 'K': piece = (int)Defs.Pieces.wK; break;
                     case 'Q': piece = (int)Defs.Pieces.wQ; break;
 
-                    case '1': case '2': case '3': case '4':
-                    case '5': case '6': case '7': case '8':
+                    case '1':
+                    case '2':
+                    case '3':
+                    case '4':
+                    case '5':
+                    case '6':
+                    case '7':
+                    case '8':
                         piece = (int)Defs.Pieces.EMPTY;
                         // converting digit char to no.
                         // ASCII value of 0 is 48. if the fen[fenCnt] was 3 then ASCII val would be 51
@@ -209,7 +215,7 @@ namespace ChessEngine
 
                 for (int i = 0; i < count; i++)
                 {
-                    sq120 = Defs.getSquareIndex(file, rank);
+                    sq120 = Defs.GetSquareIndex(file, rank);
                     pieces[sq120] = piece;
                     file++;
                 }
@@ -244,11 +250,52 @@ namespace ChessEngine
             {
                 file = fen[fenCnt] - 'a';
                 rank = fen[fenCnt + 1] - '1';
-                enPas = Defs.getSquareIndex(file, rank);
+                enPas = Defs.GetSquareIndex(file, rank);
             }
 
             posKey = GeneratePosKey();  // build new zorbist hash for the board.
         }
+
+        public void PrintBoard()
+        {
+            int sq, file, rank, piece;
+
+            Console.WriteLine("\nGame Board:\n");
+            for (rank = (int)Defs.Ranks.RANK_8; rank >= (int)Defs.Ranks.RANK_1; rank--)
+            {
+                string line = Defs.RankChar[rank] + "  ";
+
+                for (file = (int)Defs.Files.FILE_A; file <= (int)Defs.Files.FILE_H; file++)
+                {
+                    sq = Defs.GetSquareIndex(file, rank);
+                    piece = pieces[sq];
+                    line += Defs.PceChar[piece] + " ";
+                }
+                Console.WriteLine(line);
+            }
+
+            Console.WriteLine("");
+            string footer = "   ";
+
+            for (file = (int)Defs.Files.FILE_A; file <= (int)Defs.Files.FILE_H; file++)
+            {
+                footer += Defs.FileChar[file] + " ";
+            }
+            Console.WriteLine(footer);
+
+            Console.WriteLine("side: " + Defs.SideChar[(int)side]);
+            Console.WriteLine("enPas: " + enPas);
+
+            string castleRights = "";
+            if ((castlePerm & Defs.CASTLEBIT.WKCA) != 0) castleRights += "K";
+            if ((castlePerm & Defs.CASTLEBIT.WQCA) != 0) castleRights += "Q";
+            if ((castlePerm & Defs.CASTLEBIT.BKCA) != 0) castleRights += "k";
+            if ((castlePerm & Defs.CASTLEBIT.BQCA) != 0) castleRights += "q";
+
+            Console.WriteLine("castle: " + castleRights);
+            Console.WriteLine("key: " + posKey.ToString("X")); // hexadecimal
+        }
+
     }
 
     

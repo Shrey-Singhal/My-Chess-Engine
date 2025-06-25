@@ -10,9 +10,12 @@ builder.Services.AddSwaggerGen();
 Defs.InitFilesRanksBoard();
 Defs.InitSq120To64();
 
-Gameboard board = new Gameboard();
-board.InitHashKeys();
-board.posKey = board.GeneratePosKey();
+Gameboard board = new();
+board.InitHashKeys(); // set up random hash keys
+board.ParseFEN(Defs.START_FEN); // load initial position
+board.posKey = board.GeneratePosKey(); // gen hash for that position
+
+board.PrintBoard();
 
 var app = builder.Build();
 

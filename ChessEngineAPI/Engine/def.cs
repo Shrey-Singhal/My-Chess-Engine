@@ -57,16 +57,16 @@ namespace ChessEngine
             public const int TRUE = 1;
         }
 
-        public static int MAXGAMEMOVES = 2048;
-        public static int MAXPOSITIONMOVES = 256;
-        public static int MAXDEPTH = 64;
+        public const int MAXGAMEMOVES = 2048;
+        public const int MAXPOSITIONMOVES = 256;
+        public const int MAXDEPTH = 64;
         
         //10 x 12 board representation instead of 8 x 8
         public const int BRD_SQ_NUM = 120;
 
         // these 2 lists contain file index and rank index for each square
-        public static int[] FilesBrd = new int[BRD_SQ_NUM];
-        public static int[] RanksBrd = new int[BRD_SQ_NUM];
+        public static readonly int[] FilesBrd = new int[BRD_SQ_NUM];
+        public static readonly int[] RanksBrd = new int[BRD_SQ_NUM];
 
         public static void InitFilesRanksBoard()
         {
@@ -81,7 +81,7 @@ namespace ChessEngine
             {
                 for (int file = 0; file < 8; ++file)
                 {
-                    int sq = getSquareIndex(file, rank);
+                    int sq = GetSquareIndex(file, rank);
                     FilesBrd[sq] = file;
                     RanksBrd[sq] = rank;
 
@@ -89,7 +89,7 @@ namespace ChessEngine
             }
         }
         
-        private static Random rand = new Random();
+        private static readonly Random rand = new();
         public static ulong Rand64()
         {
             ulong r1 = (ulong)rand.Next(0, int.MaxValue);
@@ -98,15 +98,21 @@ namespace ChessEngine
         }
 
         //function to get square index
-        public static int getSquareIndex(int file, int rank)
+        public static int GetSquareIndex(int file, int rank)
         {
             return file + 21 + (rank * 10);
         }
 
         // the arrays and functions below help you to convert between 64 square board index and
         // 120 square board index.
-        public static int[] Sq120ToSq64 = new int[BRD_SQ_NUM];
-        public static int[] Sq64ToSq120 = new int[64];
+        public static readonly int[] Sq120ToSq64 = new int[BRD_SQ_NUM];
+        public static readonly int[] Sq64ToSq120 = new int[64];
+
+        public const string START_FEN = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
+        public static readonly string[] PceChar = [".", "P", "N", "B", "R", "Q", "K", "p", "n", "b", "r", "q", "k"];
+        public static readonly string[] FileChar = ["a", "b", "c", "d", "e", "f", "g", "h"];
+        public static readonly string[] RankChar = ["1", "2", "3", "4", "5", "6", "7", "8"];
+        public static readonly string[] SideChar = ["w", "b"];
 
         public static void InitSq120To64()
         {
@@ -126,7 +132,7 @@ namespace ChessEngine
             {
                 for (int file = (int)Files.FILE_A; file <= (int)Files.FILE_H; ++file)
                 {
-                    int sq120 = getSquareIndex(file, rank);
+                    int sq120 = GetSquareIndex(file, rank);
                     Sq64ToSq120[sq64] = sq120;
                     Sq120ToSq64[sq120] = sq64;
                     sq64++;
