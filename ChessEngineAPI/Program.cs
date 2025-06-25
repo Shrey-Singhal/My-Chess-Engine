@@ -6,6 +6,7 @@ var builder = WebApplication.CreateBuilder(args);
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+builder.Services.AddControllers();
 
 Defs.InitFilesRanksBoard();
 Defs.InitSq120To64();
@@ -17,7 +18,20 @@ board.posKey = board.GeneratePosKey(); // gen hash for that position
 
 board.PrintBoard();
 
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowAll", policy =>
+    {
+        policy.AllowAnyOrigin()
+              .AllowAnyMethod()
+              .AllowAnyHeader();
+    });
+});
+
+
 var app = builder.Build();
+
+app.UseCors("AllowAll");
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
@@ -28,11 +42,13 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
+app.MapControllers();
+
 app.MapGet("/api/newgame", () =>
 {
     return Results.Ok("New Chess game created and board initialized");
 })
-.WithName("GetWeatherForecast")
+.WithName("GetNewGame")
 .WithOpenApi();
 
 app.Run();
