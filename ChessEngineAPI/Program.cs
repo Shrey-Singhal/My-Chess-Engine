@@ -1,4 +1,4 @@
-using ChessEngine;
+using ChessEngineAPI.Engine;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -8,15 +8,8 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddControllers();
 
-Defs.InitFilesRanksBoard();
-Defs.InitSq120To64();
-
-Gameboard board = new();
-board.InitHashKeys(); // set up random hash keys
-board.ParseFEN(Defs.START_FEN); // load initial position
-board.posKey = board.GeneratePosKey(); // gen hash for that position
-
-board.PrintBoard();
+// register ChessEngineState class with dependency injection.
+builder.Services.AddSingleton<ChessEngineState>();
 
 builder.Services.AddCors(options =>
 {

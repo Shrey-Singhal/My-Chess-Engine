@@ -1,4 +1,4 @@
-namespace ChessEngine
+namespace ChessEngineAPI.Engine
 {
     // Each piece type has a unique ID, and these arrays store quick info (like value or flags) at 
     // the index matching that ID. So the engine can instantly look up piece properties without if-else checks.
@@ -6,7 +6,7 @@ namespace ChessEngine
     // 0 -> EMPTY or NO_PIECE. 1 → White Pawn (wP), 2 → White Knight (wN),  3 → White Bishop (wB),  4 → White Rook (wR)
     // 5 → White Queen (wQ),  6 → White King (wK),  7 → Black Pawn (bP),  8 → Black Knight (bN)
     // 9 → Black Bishop (bB),  10 → Black Rook (bR),  11 → Black Queen (bQ), 12 → Black King (bK)
-    
+
     public static class PieceProperties
     {
         //	Is it a big piece (not a pawn)?

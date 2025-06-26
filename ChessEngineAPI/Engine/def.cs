@@ -1,4 +1,4 @@
-namespace ChessEngine
+namespace ChessEngineAPI.Engine
 
 // all enums, lists, constants, conversion tables, helper functions
 {

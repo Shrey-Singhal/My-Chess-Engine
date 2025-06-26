@@ -1,6 +1,6 @@
 using System.Security.Cryptography.X509Certificates;
 
-namespace ChessEngine
+namespace ChessEngineAPI.Engine
 {
     public class Gameboard
     {
