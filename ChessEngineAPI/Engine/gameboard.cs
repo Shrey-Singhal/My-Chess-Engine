@@ -333,6 +333,92 @@ namespace ChessEngineAPI.Engine
 
             }
         }
+        // this function is asking - "If I place a king on this square, is it in danger from any enemy piece?"
+        // its not just for king but all pieces.
+        public int SqAttacked(int sq, int side)
+        {
+            int pce, temp_sq, index;
+
+            // pawn attacks
+            if (side == (int)Defs.Colours.WHITE)
+            {
+                if (pieces[sq - 11] == (int)Defs.Pieces.wP || pieces[sq - 9] == (int)Defs.Pieces.wP)
+                {
+                    return Defs.Bool.TRUE;
+                }
+            }
+            else
+            {
+                if (pieces[sq + 11] == (int)Defs.Pieces.bp || pieces[sq + 9] == (int)Defs.Pieces.bp)
+                {
+                    return Defs.Bool.TRUE;
+                }
+            }
+            // knight attacks
+            for (index = 0; index < 8; index++)
+            {
+                pce = pieces[sq + Defs.KnDir[index]];
+                if (pce != Defs.Squares.OFFBOARD && (int)PieceProperties.PieceCol[pce] == side
+                    && PieceProperties.PieceKnight[pce])
+                {
+                    return Defs.Bool.TRUE;
+                }
+            }
+            // sliding pieces
+            for (index = 0; index < 4; index++)
+            {
+                int dir = Defs.RkDir[index];
+                temp_sq = sq + dir;
+                pce = pieces[temp_sq];
+                while (pce != Defs.Squares.OFFBOARD)
+                {
+                    if (pce != (int)Defs.Pieces.EMPTY)
+                    {
+                        if (PieceProperties.PieceRookQueen[pce] && (int)PieceProperties.PieceCol[pce] == side)
+                        {
+                            return Defs.Bool.TRUE;
+                        }
+                        break;
+                    }
+                    temp_sq += dir;
+                    pce = pieces[temp_sq];
+                }                
+            }
+            // diagonal sliding pieces
+            for (index = 0; index < 4; index++)
+            {
+                int dir = Defs.BiDir[index];
+                temp_sq = sq + dir;
+                pce = pieces[temp_sq];
+
+                while (pce != Defs.Squares.OFFBOARD)
+                {
+                    if (pce != (int)Defs.Pieces.EMPTY)
+                    {
+                        if (PieceProperties.PieceBishopQueen[pce] && (int)PieceProperties.PieceCol[pce] == side)
+                        {
+                            return Defs.Bool.TRUE;
+                        }
+                        break;
+                    }
+                    temp_sq += dir;
+                    pce = pieces[temp_sq];
+                }
+            }
+            // kings attack
+            for (index = 0; index < 8; index++)
+            {
+                pce = pieces[Defs.KiDir[index] + sq];
+
+                if (pce != Defs.Squares.OFFBOARD &&
+                    PieceProperties.PieceKing[pce] && (int)PieceProperties.PieceCol[pce] == side)
+                {
+                    return Defs.Bool.TRUE;
+                } 
+            }
+
+            return Defs.Bool.FALSE;
+        }
 
     }
 

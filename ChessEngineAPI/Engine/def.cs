@@ -60,7 +60,7 @@ namespace ChessEngineAPI.Engine
         public const int MAXGAMEMOVES = 2048;
         public const int MAXPOSITIONMOVES = 256;
         public const int MAXDEPTH = 64;
-        
+
         //10 x 12 board representation instead of 8 x 8
         public const int BRD_SQ_NUM = 120;
 
@@ -88,7 +88,7 @@ namespace ChessEngineAPI.Engine
                 }
             }
         }
-        
+
         private static readonly Random rand = new();
         public static ulong Rand64()
         {
@@ -149,6 +149,11 @@ namespace ChessEngineAPI.Engine
         {
             return Sq64ToSq120[sq64];
         }
+
+        public static readonly int[] KnDir = [-8, -19, -21, -12, 8, 19, 21, 12];
+        public static readonly int[] RkDir = [-1, -10, 1, 10];
+        public static readonly int[] BiDir = [-9, -11, 11, 9];
+        public static readonly int[] KiDir = [1, -10, 1, 10, -9, -11, 11, 9];
 
 
     }
