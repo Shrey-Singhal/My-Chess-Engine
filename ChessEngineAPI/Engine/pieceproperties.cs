@@ -10,56 +10,56 @@ namespace ChessEngineAPI.Engine
     public static class PieceProperties
     {
         //	Is it a big piece (not a pawn)?
-        public static readonly bool[] PieceBig = {
+        public static readonly bool[] PieceBig = [
             false, false, true, true, true, true, true, false, true, true, true, true, true
-        };
+        ];
 
         //Is it a major piece (rook, queen)?
-        public static readonly bool[] PieceMaj = {
+        public static readonly bool[] PieceMaj = [
             false, false, false, false, true, true, true, false, false, false, true, true, true
-        };
+        ];
 
         //	Is it a minor piece (bishop, knight)?
-        public static readonly bool[] PieceMin = {
+        public static readonly bool[] PieceMin = [
             false, false, true, true, false, false, false, false, true, true, false, false, false
-        };
+        ];
 
         //What is its material value?
-        public static readonly int[] PieceVal = {
+        public static readonly int[] PieceVal = [
             0, 100, 325, 325, 550, 1000, 50000, 100, 325, 325, 550, 1000, 50000
-        };
+        ];
 
         //PieceCol tells you which side owns a given piece type.
-        public static readonly Defs.Colours[] PieceCol = {
+        public static readonly Defs.Colours[] PieceCol = [
             Defs.Colours.BOTH, Defs.Colours.WHITE, Defs.Colours.WHITE, Defs.Colours.WHITE,
             Defs.Colours.WHITE, Defs.Colours.WHITE, Defs.Colours.WHITE,
             Defs.Colours.BLACK, Defs.Colours.BLACK, Defs.Colours.BLACK,
             Defs.Colours.BLACK, Defs.Colours.BLACK, Defs.Colours.BLACK
-        };
+        ];
 
-        public static readonly bool[] PiecePawn = {
+        public static readonly bool[] PiecePawn = [
             false, true, false, false, false, false, false, true, false, false, false, false, false
-        };
+        ];
 
-        public static readonly bool[] PieceKnight = {
+        public static readonly bool[] PieceKnight = [
             false, false, true, false, false, false, false, false, true, false, false, false, false
-        };
+        ];
 
-        public static readonly bool[] PieceKing = {
+        public static readonly bool[] PieceKing = [
             false, false, false, false, false, false, true, false, false, false, false, false, true
-        };
+        ];
 
-        public static readonly bool[] PieceRookQueen = {
+        public static readonly bool[] PieceRookQueen = [
             false, false, false, false, true, true, false, false, false, false, true, true, false
-        };
+        ];
 
-        public static readonly bool[] PieceBishopQueen = {
+        public static readonly bool[] PieceBishopQueen = [
             false, false, false, true, false, true, false, false, false, true, false, true, false
-        };
+        ];
         // Does it slide (bishop, rook, queen)?
-        public static readonly bool[] PieceSlides = {
+        public static readonly bool[] PieceSlides = [
             false, false, false, true, true, true, false, false, false, true, true, true, false
-        };
+        ];
     }
 
 }

@@ -25,6 +25,12 @@ namespace ChessEngineAPI.Engine
 
         // 10 means the max no of pieces per piece type (8 pawns, 2 knights), we take 10 bcz those 8 pawns
         // can be promoted and become a knight.
+
+        //The board (pieces[120]) holds what piece is at each square.
+        //pList tells you where each piece is. It’s a reverse mapping.
+
+        // Quickly loop over all white rooks: piece = 4, check pceNum[4] for count, look at pList[40..49].
+        // Useful for move generation, evaluation, etc.
         public int[] pList = new int[14 * 10];
 
         public int enPas;
@@ -60,7 +66,7 @@ namespace ChessEngineAPI.Engine
             posKey = 0;
 
         }
-        // this gives you which square the 9th piece of x on
+        // gives a unique index in pList based on the piece type and how many of that piece have been seen so far.
         public static int PCEINDEX(int pce, int pceNum)
         {
             return pce * 10 + pceNum;
@@ -112,37 +118,19 @@ namespace ChessEngineAPI.Engine
 
         public void ResetBoard()
         {
-            // 1. Set all 120 squares to OFFBOARD
+            // Set all 120 squares to OFFBOARD
             for (int i = 0; i < Defs.BRD_SQ_NUM; ++i)
             {
                 pieces[i] = Defs.Squares.OFFBOARD;
             }
 
-            // 2. Set real 64 squares to EMPTY
+            // Set real 64 squares to EMPTY
             for (int i = 0; i < 64; ++i)
             {
                 pieces[Defs.SQ120(i)] = (int)Defs.Pieces.EMPTY;
             }
 
-            // 3. Clear piece list
-            for (int i = 0; i < 14 * 10; ++i)
-            {
-                pList[i] = (int)Defs.Pieces.EMPTY;
-            }
-
-            // 4. Reset material scores (white, black)
-            for (int i = 0; i < 2; ++i)
-            {
-                material[i] = 0;
-            }
-
-            // 5. Reset piece counts
-            for (int i = 0; i < 13; ++i)
-            {
-                pceNum[i] = 0;
-            }
-
-            // 6. Reset other board info
+            // Reset other board info
             side = Defs.Colours.BOTH;
             enPas = Defs.Squares.NO_SQ;
             fiftyMove = 0;
@@ -151,7 +139,7 @@ namespace ChessEngineAPI.Engine
             castlePerm = 0;
             posKey = 0;
 
-            // 7. Reset move list start for this ply
+            // Reset move list start for this ply
             moveListStart[ply] = 0;
         }
 
@@ -254,6 +242,7 @@ namespace ChessEngineAPI.Engine
             }
 
             posKey = GeneratePosKey();  // build new zorbist hash for the board.
+            UpdateListsMaterial();
         }
 
         public void PrintBoard()
@@ -294,6 +283,55 @@ namespace ChessEngineAPI.Engine
 
             Console.WriteLine("castle: " + castleRights);
             Console.WriteLine("key: " + posKey.ToString("X")); // hexadecimal
+        }
+
+        public void UpdateListsMaterial()
+        {
+            int piece, sq, index, color;
+
+            // Clear piece list
+            for (int i = 0; i < 14 * 10; ++i)
+            {
+                pList[i] = (int)Defs.Pieces.EMPTY;
+            }
+
+            // Reset material scores (white, black)
+            for (int i = 0; i < 2; ++i)
+            {
+                material[i] = 0;
+            }
+
+            // Reset piece counts
+            for (int i = 0; i < 13; ++i)
+            {
+                pceNum[i] = 0;
+            }
+
+            for (index = 0; index < 64; ++index)
+            {
+                sq = Defs.SQ120(index);
+                piece = pieces[sq];
+                if (piece != (int)Defs.Pieces.EMPTY)
+                {
+                    color = (int)PieceProperties.PieceCol[piece];
+                    material[color] += PieceProperties.PieceVal[piece];
+
+                    // Example: pList[PCEINDEX(2, 0)] = 57
+                    // This means:
+
+                    // 1st white knight (piece = 2, num = 0) is on square 57.
+
+                    // PCEINDEX(2, 0) = 2 * 10 + 0 = 20
+
+                    // So pList[20] = 57                        
+                    pList[PCEINDEX(piece, pceNum[piece])] = sq;
+
+                    pceNum[piece]++;
+
+                    Console.WriteLine("piece: " + piece + " Square: " + sq);
+                }
+
+            }
         }
 
     }

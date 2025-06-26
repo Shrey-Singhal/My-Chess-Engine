@@ -21,8 +21,10 @@ builder.Services.AddCors(options =>
     });
 });
 
-
 var app = builder.Build();
+
+// Force ChessEngineState initialization
+app.Services.GetRequiredService<ChessEngineState>();
 
 app.UseCors("AllowAll");
 
