@@ -50,7 +50,11 @@ namespace ChessEngineAPI.Engine
         // random number for who's turn it is.
         public ulong SideKey;
 
+        // moveList and moveListStart are only used for temporary move 
+        // storage during engine search (plies - imagined future moves)
 
+        // moveList - All generated moves at all plies
+        // moveListStart - 	Index where each ply's moves begin
         public int[] moveList = new int[Defs.MAXDEPTH * Defs.MAXPOSITIONMOVES];
         public int[] moveScores = new int[Defs.MAXDEPTH * Defs.MAXPOSITIONMOVES];
         public int[] moveListStart = new int[Defs.MAXDEPTH];
