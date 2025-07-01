@@ -162,6 +162,9 @@ namespace ChessEngineAPI.Engine
         // 0 in the array below is just used to separate black and white
         public static readonly int[] LoopNonSlidePce = [(int)Pieces.wN, (int)Pieces.wK, 0, (int)Pieces.bN, (int)Pieces.bK, 0];
         public static readonly int[] LoopNonSlideIndex = [0, 3];
+
+        public static readonly int[] LoopSlidePce = [(int)Pieces.wB, (int)Pieces.wR, (int)Pieces.wQ, 0, (int)Pieces.bB, (int)Pieces.bR, (int)Pieces.bQ, 0];
+        public static readonly int[] LoopSlideIndex = [0, 4];
         public static int SQOFFBOARD(int sq)
         {
             if (FilesBrd[sq] == Squares.OFFBOARD)

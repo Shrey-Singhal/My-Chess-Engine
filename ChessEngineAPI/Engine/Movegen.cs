@@ -183,7 +183,41 @@ namespace ChessEngineAPI.Engine
                 }
                 pce = Defs.LoopNonSlidePce[pceIndex++];
             }
-            
+
+            // move gen logic for sliding pieces
+            pceIndex = Defs.LoopSlideIndex[(int)board.side];
+            pce = Defs.LoopSlidePce[pceIndex++];
+
+            while (pce != 0)
+            {
+                // visit all squares occupied by a parrticular piece
+                for (pceNum = 0; pceNum < board.pceNum[pce]; ++pceNum)
+                {
+                    sq = board.pList[Gameboard.PCEINDEX(pce, pceNum)];
+
+                    for (index = 0; index < Defs.DirNum[pce]; ++index)
+                    {
+                        dir = Defs.PceDir[pce][index];
+                        temp_sq = sq + dir;
+
+                        while (Defs.SQOFFBOARD(temp_sq) == Defs.Bool.FALSE)
+                        {
+                            if (board.pieces[temp_sq] != (int)Defs.Pieces.EMPTY)
+                            {
+                                if (PieceProperties.PieceCol[temp_sq] != board.side)
+                                {
+                                    // add capture
+                                }
+                                break;
+
+                            }
+                            // non capture move
+                            temp_sq += dir;                                                        
+                        }                        
+                    }
+                }
+                pce = Defs.LoopSlidePce[pceIndex++];
+            }            
         }
     }
 }
