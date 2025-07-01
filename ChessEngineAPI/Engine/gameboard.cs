@@ -12,10 +12,12 @@ namespace ChessEngineAPI.Engine
 
         // ply is just engine calculating a certain number of moves ahead at a particular 
         // position to find the best move
+        // if engine is playing black and calculating moves for black after white play a move
+        // then ply 0 would be blacks options for moves and ply 1 would be whites response options to those moves and so on
         public int ply;
         public Defs.CASTLEBIT castlePerm; // track which side can castle legally
         public int[] material = new int[2]; // total material value for black and white
-        public int[] pceNum = new int[13];
+        public int[] pceNum = new int[13]; // count of each piece type
 
         // pList is a piece list — it keeps track of where every piece is on the board, organized by piece type.
         // each piece type gets a block of 10 slots
@@ -53,7 +55,7 @@ namespace ChessEngineAPI.Engine
         // moveList and moveListStart are only used for temporary move 
         // storage during engine search (plies - imagined future moves)
 
-        // moveList - All generated moves at all plies
+        // moveList - All generated moves at all plies so essentially an array of all imagined moves.
         // moveListStart - 	Index where each ply's moves begin
         public int[] moveList = new int[Defs.MAXDEPTH * Defs.MAXPOSITIONMOVES];
         public int[] moveScores = new int[Defs.MAXDEPTH * Defs.MAXPOSITIONMOVES];
