@@ -11,7 +11,7 @@ namespace ChessEngineAPI.Engine
         {
             board.moveListStart[board.ply + 1] = board.moveListStart[board.ply];
 
-            int pceType, pceNum, sq;
+            int pceType, pceNum, sq, pceIndex, pce, temp_sq, dir, index;
 
             if (board.side == Defs.Colours.WHITE)
             {
@@ -121,7 +121,7 @@ namespace ChessEngineAPI.Engine
                         }
                     }
                 }
-                
+
                 if ((board.castlePerm & Defs.CASTLEBIT.BKCA) != 0)
                 {
                     if (board.pieces[Defs.Squares.F8] == (int)Defs.Pieces.EMPTY && board.pieces[Defs.Squares.G8] == (int)Defs.Pieces.EMPTY)
@@ -147,6 +147,43 @@ namespace ChessEngineAPI.Engine
                     }
                 }
             }
+            // move gen logic for non sliding pieces
+            pceIndex = Defs.LoopNonSlideIndex[(int)board.side];
+            pce = Defs.LoopNonSlidePce[pceIndex++];
+
+            while (pce != 0)
+            {
+                // visit all squares occupied by a parrticular piece
+                for (pceNum = 0; pceNum < board.pceNum[pce]; ++pceNum)
+                {
+                    sq = board.pList[Gameboard.PCEINDEX(pce, pceNum)];
+
+                    for (index = 0; index < Defs.DirNum[pce]; ++index)
+                    {
+                        dir = Defs.PceDir[pce][index];
+                        temp_sq = sq + dir;
+
+                        if (Defs.SQOFFBOARD(temp_sq) == Defs.Bool.TRUE)
+                        {
+                            continue;
+                        }
+
+                        if (board.pieces[temp_sq] != (int)Defs.Pieces.EMPTY)
+                        {
+                            if (PieceProperties.PieceCol[temp_sq] != board.side)
+                            {
+                                // add capture
+                            }
+                            else
+                            {
+
+                            }
+                        }
+                    }
+                }
+                pce = Defs.LoopNonSlidePce[pceIndex++];
+            }
+            
         }
     }
 }

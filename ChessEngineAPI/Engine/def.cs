@@ -155,6 +155,13 @@ namespace ChessEngineAPI.Engine
         public static readonly int[] BiDir = [-9, -11, 11, 9];
         public static readonly int[] KiDir = [1, -10, 1, 10, -9, -11, 11, 9];
 
+        // the array below represents how many directions each piece can move in
+        public static readonly int[] DirNum = [0, 0, 8, 4, 4, 8, 8, 0, 8, 4, 4, 8, 8];
+        // this array tells u how each piece moves on the board by storing the diractions it can go to
+        public static readonly int[][] PceDir = [[], [], KnDir, BiDir, RkDir, KiDir, KiDir, [], KnDir, BiDir, RkDir, KiDir, KiDir];
+        // 0 in the array below is just used to separate black and white
+        public static readonly int[] LoopNonSlidePce = [(int)Pieces.wN, (int)Pieces.wK, 0, (int)Pieces.bN, (int)Pieces.bK, 0];
+        public static readonly int[] LoopNonSlideIndex = [0, 3];
         public static int SQOFFBOARD(int sq)
         {
             if (FilesBrd[sq] == Squares.OFFBOARD)
