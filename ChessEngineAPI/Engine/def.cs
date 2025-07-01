@@ -155,5 +155,16 @@ namespace ChessEngineAPI.Engine
         public static readonly int[] BiDir = [-9, -11, 11, 9];
         public static readonly int[] KiDir = [1, -10, 1, 10, -9, -11, 11, 9];
 
+        public static int SQOFFBOARD(int sq)
+        {
+            if (FilesBrd[sq] == Squares.OFFBOARD)
+            {
+                return Bool.TRUE;
+            }
+            else
+            {
+                return Bool.FALSE;
+            }
+        }
     }
 }

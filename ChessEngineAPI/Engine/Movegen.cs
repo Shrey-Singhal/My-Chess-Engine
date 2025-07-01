@@ -32,11 +32,11 @@ namespace ChessEngineAPI.Engine
                         }
                     }
 
-                    if (board.pieces[sq + 9] != Defs.Squares.OFFBOARD && PieceProperties.PieceCol[board.pieces[sq + 9]] == Defs.Colours.BLACK)
+                    if (Defs.SQOFFBOARD(sq + 9) == Defs.Bool.FALSE && PieceProperties.PieceCol[board.pieces[sq + 9]] == Defs.Colours.BLACK)
                     {
                         // add pawn capture move
                     }
-                    if (board.pieces[sq + 11] != Defs.Squares.OFFBOARD && PieceProperties.PieceCol[board.pieces[sq + 11]] == Defs.Colours.BLACK)
+                    if (Defs.SQOFFBOARD(sq + 11) == Defs.Bool.FALSE && PieceProperties.PieceCol[board.pieces[sq + 11]] == Defs.Colours.BLACK)
                     {
                         // add pawn capture move
                     }
@@ -100,11 +100,11 @@ namespace ChessEngineAPI.Engine
                         }
                     }
 
-                    if (board.pieces[sq - 9] != Defs.Squares.OFFBOARD && PieceProperties.PieceCol[board.pieces[sq - 9]] == Defs.Colours.WHITE)
+                    if (Defs.SQOFFBOARD(sq - 9) == Defs.Bool.FALSE && PieceProperties.PieceCol[board.pieces[sq - 9]] == Defs.Colours.WHITE)
                     {
                         // add pawn capture move
                     }
-                    if (board.pieces[sq - 11] != Defs.Squares.OFFBOARD && PieceProperties.PieceCol[board.pieces[sq - 11]] == Defs.Colours.WHITE)
+                    if (Defs.SQOFFBOARD(sq - 11) == Defs.Bool.FALSE && PieceProperties.PieceCol[board.pieces[sq - 11]] == Defs.Colours.WHITE)
                     {
                         // add pawn capture move
                     }
