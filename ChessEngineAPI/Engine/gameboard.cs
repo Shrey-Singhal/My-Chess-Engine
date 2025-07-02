@@ -71,6 +71,17 @@ namespace ChessEngineAPI.Engine
             enPas = 0;
             posKey = 0;
 
+            pieces = new int[Defs.BRD_SQ_NUM];
+            material = new int[2];
+            pceNum = new int[13];
+            pList = new int[14 * 10];
+            PieceKeys = new ulong[14 * 120];
+            CastleKeys = new ulong[16];
+            
+            moveList = new int[Defs.MAXDEPTH * Defs.MAXPOSITIONMOVES];
+            moveScores = new int[Defs.MAXDEPTH * Defs.MAXPOSITIONMOVES];
+            moveListStart = new int[Defs.MAXDEPTH];
+
         }
         // gives a unique index in pList based on the piece type and how many of that piece have been seen so far.
         public static int PCEINDEX(int pce, int pceNum)

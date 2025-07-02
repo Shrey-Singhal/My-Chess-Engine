@@ -67,14 +67,14 @@ namespace ChessEngineAPI.Engine
         {
             if (Defs.RanksBrd[from] == (int)Defs.Ranks.RANK_7)
             {
-                AddCaptureMove(Move(from, to, (int)Defs.Pieces.EMPTY, (int)Defs.Pieces.wQ, 0), board);
-                AddCaptureMove(Move(from, to, (int)Defs.Pieces.EMPTY, (int)Defs.Pieces.wR, 0), board);
-                AddCaptureMove(Move(from, to, (int)Defs.Pieces.EMPTY, (int)Defs.Pieces.wN, 0), board);
-                AddCaptureMove(Move(from, to, (int)Defs.Pieces.EMPTY, (int)Defs.Pieces.wB, 0), board);
+                AddQuietMove(Move(from, to, (int)Defs.Pieces.EMPTY, (int)Defs.Pieces.wQ, 0), board);
+                AddQuietMove(Move(from, to, (int)Defs.Pieces.EMPTY, (int)Defs.Pieces.wR, 0), board);
+                AddQuietMove(Move(from, to, (int)Defs.Pieces.EMPTY, (int)Defs.Pieces.wN, 0), board);
+                AddQuietMove(Move(from, to, (int)Defs.Pieces.EMPTY, (int)Defs.Pieces.wB, 0), board);
             }
             else
             {
-                AddCaptureMove(Move(from, to, (int)Defs.Pieces.EMPTY, (int)Defs.Pieces.EMPTY, 0), board);
+                AddQuietMove(Move(from, to, (int)Defs.Pieces.EMPTY, (int)Defs.Pieces.EMPTY, 0), board);
 
             }
         }
@@ -83,14 +83,14 @@ namespace ChessEngineAPI.Engine
         {
             if (Defs.RanksBrd[from] == (int)Defs.Ranks.RANK_2)
             {
-                AddCaptureMove(Move(from, to, (int)Defs.Pieces.EMPTY, (int)Defs.Pieces.bQ, 0), board);
-                AddCaptureMove(Move(from, to, (int)Defs.Pieces.EMPTY, (int)Defs.Pieces.bR, 0), board);
-                AddCaptureMove(Move(from, to, (int)Defs.Pieces.EMPTY, (int)Defs.Pieces.bN, 0), board);
-                AddCaptureMove(Move(from, to, (int)Defs.Pieces.EMPTY, (int)Defs.Pieces.bB, 0), board);
+                AddQuietMove(Move(from, to, (int)Defs.Pieces.EMPTY, (int)Defs.Pieces.bQ, 0), board);
+                AddQuietMove(Move(from, to, (int)Defs.Pieces.EMPTY, (int)Defs.Pieces.bR, 0), board);
+                AddQuietMove(Move(from, to, (int)Defs.Pieces.EMPTY, (int)Defs.Pieces.bN, 0), board);
+                AddQuietMove(Move(from, to, (int)Defs.Pieces.EMPTY, (int)Defs.Pieces.bB, 0), board);
             }
             else
             {
-                AddCaptureMove(Move(from, to, (int)Defs.Pieces.EMPTY, (int)Defs.Pieces.EMPTY, 0), board);
+                AddQuietMove(Move(from, to, (int)Defs.Pieces.EMPTY, (int)Defs.Pieces.EMPTY, 0), board);
 
             }
         }
@@ -119,7 +119,7 @@ namespace ChessEngineAPI.Engine
                     if (board.pieces[sq + 10] == (int)Defs.Pieces.EMPTY)
                     {
                         // add pawn move
-                        AddBlackPawnQuietMove(sq, sq + 10, board);
+                        AddWhitePawnQuietMove(sq, sq + 10, board);
                         // we check if we're on the 2nd rank since white's pawn are initially on 2n rank
                         // and if the 2 squares at the front are empty we can play the double pawn move.
                         if (Defs.RanksBrd[sq] == (int)Defs.Ranks.RANK_2 && board.pieces[sq + 20] == (int)Defs.Pieces.EMPTY)
@@ -199,7 +199,7 @@ namespace ChessEngineAPI.Engine
                     {
                         // add pawn move 
                         AddBlackPawnQuietMove(sq, sq - 10, board);
-                                               
+
                         if (Defs.RanksBrd[sq] == (int)Defs.Ranks.RANK_7 && board.pieces[sq - 20] == (int)Defs.Pieces.EMPTY)
                         {
                             AddQuietMove(Move(sq, sq - 20, (int)Defs.Pieces.EMPTY, (int)Defs.Pieces.EMPTY, MoveUtils.MFLAG_PAWN_START), board);
@@ -280,18 +280,11 @@ namespace ChessEngineAPI.Engine
                             continue;
                         }
 
-                        if (board.pieces[temp_sq] != (int)Defs.Pieces.EMPTY)
-                        {
-                            if (PieceProperties.PieceCol[temp_sq] != board.side)
-                            {
-                                // add capture
-                                AddCaptureMove(Move(sq, temp_sq, board.pieces[temp_sq], (int)Defs.Pieces.EMPTY, 0), board);
-                            }
-                            else
-                            {
-                                AddQuietMove(Move(sq, temp_sq, (int)Defs.Pieces.EMPTY, (int)Defs.Pieces.EMPTY, 0), board);
-                            }
-                        }
+                        if (board.pieces[temp_sq] == (int)Defs.Pieces.EMPTY) {
+                            AddQuietMove(Move(sq, temp_sq, (int)Defs.Pieces.EMPTY, (int)Defs.Pieces.EMPTY, 0), board);
+                        } else if (PieceProperties.PieceCol[board.pieces[temp_sq]] != board.side) {
+                            AddCaptureMove(Move(sq, temp_sq, board.pieces[temp_sq], (int)Defs.Pieces.EMPTY, 0), board);
+                        }                        
                     }
                 }
                 pce = Defs.LoopNonSlidePce[pceIndex++];
@@ -317,7 +310,7 @@ namespace ChessEngineAPI.Engine
                         {
                             if (board.pieces[temp_sq] != (int)Defs.Pieces.EMPTY)
                             {
-                                if (PieceProperties.PieceCol[temp_sq] != board.side)
+                                if (PieceProperties.PieceCol[board.pieces[temp_sq]] != board.side)
                                 {
                                     // add capture
                                     AddCaptureMove(Move(sq, temp_sq, board.pieces[temp_sq], (int)Defs.Pieces.EMPTY, 0), board);
@@ -332,6 +325,51 @@ namespace ChessEngineAPI.Engine
                     }
                 }
                 pce = Defs.LoopSlidePce[pceIndex++];
+            }
+        }
+
+        public string PrintMove(int move)
+        {
+            string MvStr;
+            int ff = Defs.FilesBrd[MoveUtils.FromSquare(move)]; //file from
+            int rf = Defs.RanksBrd[MoveUtils.FromSquare(move)]; //rank from
+            int ft = Defs.FilesBrd[MoveUtils.ToSquare(move)]; //file to
+            int rt = Defs.RanksBrd[MoveUtils.ToSquare(move)]; //rank to
+
+            MvStr = Defs.FileChar[ff] + Defs.RankChar[rf] + Defs.FileChar[ft] + Defs.RankChar[rt];
+
+            int promoted = MoveUtils.PromotedPiece(move);
+
+            if (promoted != (int)Defs.Pieces.EMPTY)
+            {
+                char pchar = 'q';
+                if (PieceProperties.PieceKnight[promoted] == true)
+                {
+                    pchar = 'n';
+                }
+                else if (PieceProperties.PieceRookQueen[promoted] == true && PieceProperties.PieceBishopQueen[promoted] == false)
+                {
+                    pchar = 'r';
+                }
+                else if (PieceProperties.PieceRookQueen[promoted] == false && PieceProperties.PieceBishopQueen[promoted] == true)
+                {
+                    pchar = 'b';
+                }
+                MvStr += pchar;
+            }
+            return MvStr;
+        }
+
+        public void PrintMoveList(Gameboard board)
+        {
+            int index, move;
+
+            Console.WriteLine("MoveList:");
+
+            for (index = board.moveListStart[board.ply]; index < board.moveListStart[board.ply + 1]; ++index)
+            {
+                move = board.moveList[index];
+                Console.WriteLine(PrintMove(move));
             }
         }
     }

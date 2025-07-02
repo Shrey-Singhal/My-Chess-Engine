@@ -16,6 +16,10 @@ namespace ChessEngineAPI.Engine
             Board.posKey = Board.GeneratePosKey(); // gen hash for that position
 
             Board.PrintBoard();
+
+            Movegen movegen = new();
+            movegen.GenerateMoves(Board);
+            movegen.PrintMoveList(Board);
         }
 
         public void SetPositionFromFEN(string FEN)
@@ -23,6 +27,10 @@ namespace ChessEngineAPI.Engine
             Board.ParseFEN(FEN);
             Board.posKey = Board.GeneratePosKey();
             Board.PrintBoard();
+
+            Movegen movegen = new();
+            movegen.GenerateMoves(Board);
+            movegen.PrintMoveList(Board);
         }
     }
 }
