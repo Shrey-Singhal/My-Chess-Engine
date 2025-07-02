@@ -31,6 +31,72 @@ namespace ChessEngineAPI.Engine
             board.moveScores[board.moveListStart[board.ply + 1]++] = 0;
         }
 
+        public void AddWhitePawnCaptureMove(int from, int to, int cap, Gameboard board)
+        {
+            if (Defs.RanksBrd[from] == (int)Defs.Ranks.RANK_7)
+            {
+                AddCaptureMove(Move(from, to, cap, (int)Defs.Pieces.wQ, 0), board);
+                AddCaptureMove(Move(from, to, cap, (int)Defs.Pieces.wR, 0), board);
+                AddCaptureMove(Move(from, to, cap, (int)Defs.Pieces.wN, 0), board);
+                AddCaptureMove(Move(from, to, cap, (int)Defs.Pieces.wB, 0), board);
+            }
+            else
+            {
+                AddCaptureMove(Move(from, to, cap, (int)Defs.Pieces.EMPTY, 0), board);
+
+            }
+        }
+
+        public void AddBlackPawnCaptureMove(int from, int to, int cap, Gameboard board)
+        {
+            if (Defs.RanksBrd[from] == (int)Defs.Ranks.RANK_2)
+            {
+                AddCaptureMove(Move(from, to, cap, (int)Defs.Pieces.bQ, 0), board);
+                AddCaptureMove(Move(from, to, cap, (int)Defs.Pieces.bR, 0), board);
+                AddCaptureMove(Move(from, to, cap, (int)Defs.Pieces.bN, 0), board);
+                AddCaptureMove(Move(from, to, cap, (int)Defs.Pieces.bB, 0), board);
+            }
+            else
+            {
+                AddCaptureMove(Move(from, to, cap, (int)Defs.Pieces.EMPTY, 0), board);
+
+            }
+        }
+
+        public void AddWhitePawnQuietMove(int from, int to, Gameboard board)
+        {
+            if (Defs.RanksBrd[from] == (int)Defs.Ranks.RANK_7)
+            {
+                AddCaptureMove(Move(from, to, (int)Defs.Pieces.EMPTY, (int)Defs.Pieces.wQ, 0), board);
+                AddCaptureMove(Move(from, to, (int)Defs.Pieces.EMPTY, (int)Defs.Pieces.wR, 0), board);
+                AddCaptureMove(Move(from, to, (int)Defs.Pieces.EMPTY, (int)Defs.Pieces.wN, 0), board);
+                AddCaptureMove(Move(from, to, (int)Defs.Pieces.EMPTY, (int)Defs.Pieces.wB, 0), board);
+            }
+            else
+            {
+                AddCaptureMove(Move(from, to, (int)Defs.Pieces.EMPTY, (int)Defs.Pieces.EMPTY, 0), board);
+
+            }
+        }
+
+        public void AddBlackPawnQuietMove(int from, int to, Gameboard board)
+        {
+            if (Defs.RanksBrd[from] == (int)Defs.Ranks.RANK_2)
+            {
+                AddCaptureMove(Move(from, to, (int)Defs.Pieces.EMPTY, (int)Defs.Pieces.bQ, 0), board);
+                AddCaptureMove(Move(from, to, (int)Defs.Pieces.EMPTY, (int)Defs.Pieces.bR, 0), board);
+                AddCaptureMove(Move(from, to, (int)Defs.Pieces.EMPTY, (int)Defs.Pieces.bN, 0), board);
+                AddCaptureMove(Move(from, to, (int)Defs.Pieces.EMPTY, (int)Defs.Pieces.bB, 0), board);
+            }
+            else
+            {
+                AddCaptureMove(Move(from, to, (int)Defs.Pieces.EMPTY, (int)Defs.Pieces.EMPTY, 0), board);
+
+            }
+        }
+
+
+
         public void GenerateMoves(Gameboard board)
         {
             // start writing the moves for next ply at the same index where the current ply ended up after move gen.
@@ -53,11 +119,12 @@ namespace ChessEngineAPI.Engine
                     if (board.pieces[sq + 10] == (int)Defs.Pieces.EMPTY)
                     {
                         // add pawn move
+                        AddBlackPawnQuietMove(sq, sq + 10, board);
                         // we check if we're on the 2nd rank since white's pawn are initially on 2n rank
                         // and if the 2 squares at the front are empty we can play the double pawn move.
                         if (Defs.RanksBrd[sq] == (int)Defs.Ranks.RANK_2 && board.pieces[sq + 20] == (int)Defs.Pieces.EMPTY)
                         {
-                            AddQuietMove(Move(sq, sq+20, (int)Defs.Pieces.EMPTY, (int)Defs.Pieces.EMPTY, MoveUtils.MFLAG_PAWN_START), board);
+                            AddQuietMove(Move(sq, sq + 20, (int)Defs.Pieces.EMPTY, (int)Defs.Pieces.EMPTY, MoveUtils.MFLAG_PAWN_START), board);
 
                         }
                     }
@@ -65,10 +132,12 @@ namespace ChessEngineAPI.Engine
                     if (Defs.SQOFFBOARD(sq + 9) == Defs.Bool.FALSE && PieceProperties.PieceCol[board.pieces[sq + 9]] == Defs.Colours.BLACK)
                     {
                         // add pawn capture move
+                        AddWhitePawnCaptureMove(sq, sq + 9, board.pieces[sq + 9], board);
                     }
                     if (Defs.SQOFFBOARD(sq + 11) == Defs.Bool.FALSE && PieceProperties.PieceCol[board.pieces[sq + 11]] == Defs.Colours.BLACK)
                     {
                         // add pawn capture move
+                        AddWhitePawnCaptureMove(sq, sq + 11, board.pieces[sq + 9], board);
                     }
 
                     // check if there's a valid en passant target square in the board.
@@ -77,13 +146,13 @@ namespace ChessEngineAPI.Engine
                         if (sq + 9 == board.enPas)
                         {
                             //add enpas move
-                            AddEnPassantMove(Move(sq, sq+9, (int)Defs.Pieces.EMPTY, (int)Defs.Pieces.EMPTY, MoveUtils.MFLAG_EN_PASSANT), board);
+                            AddEnPassantMove(Move(sq, sq + 9, (int)Defs.Pieces.EMPTY, (int)Defs.Pieces.EMPTY, MoveUtils.MFLAG_EN_PASSANT), board);
 
                         }
                         if (sq + 11 == board.enPas)
                         {
                             // add enpas move
-                            AddEnPassantMove(Move(sq, sq+9, (int)Defs.Pieces.EMPTY, (int)Defs.Pieces.EMPTY, MoveUtils.MFLAG_EN_PASSANT), board);
+                            AddEnPassantMove(Move(sq, sq + 9, (int)Defs.Pieces.EMPTY, (int)Defs.Pieces.EMPTY, MoveUtils.MFLAG_EN_PASSANT), board);
 
                         }
                     }
@@ -128,20 +197,24 @@ namespace ChessEngineAPI.Engine
                     // if square at the front is empty
                     if (board.pieces[sq - 10] == (int)Defs.Pieces.EMPTY)
                     {
-                        // add pawn move                        
+                        // add pawn move 
+                        AddBlackPawnQuietMove(sq, sq - 10, board);
+                                               
                         if (Defs.RanksBrd[sq] == (int)Defs.Ranks.RANK_7 && board.pieces[sq - 20] == (int)Defs.Pieces.EMPTY)
                         {
-                            AddQuietMove(Move(sq, sq-20, (int)Defs.Pieces.EMPTY, (int)Defs.Pieces.EMPTY, MoveUtils.MFLAG_PAWN_START), board);
+                            AddQuietMove(Move(sq, sq - 20, (int)Defs.Pieces.EMPTY, (int)Defs.Pieces.EMPTY, MoveUtils.MFLAG_PAWN_START), board);
                         }
                     }
 
                     if (Defs.SQOFFBOARD(sq - 9) == Defs.Bool.FALSE && PieceProperties.PieceCol[board.pieces[sq - 9]] == Defs.Colours.WHITE)
                     {
                         // add pawn capture move
+                        AddBlackPawnCaptureMove(sq, sq - 9, board.pieces[sq - 9], board);
                     }
                     if (Defs.SQOFFBOARD(sq - 11) == Defs.Bool.FALSE && PieceProperties.PieceCol[board.pieces[sq - 11]] == Defs.Colours.WHITE)
                     {
                         // add pawn capture move
+                        AddBlackPawnCaptureMove(sq, sq - 11, board.pieces[sq - 11], board);
                     }
 
                     if (board.enPas != Defs.Squares.NO_SQ)
@@ -149,13 +222,13 @@ namespace ChessEngineAPI.Engine
                         if (sq - 9 == board.enPas)
                         {
                             //add enpas move
-                            AddEnPassantMove(Move(sq, sq-9, (int)Defs.Pieces.EMPTY, (int)Defs.Pieces.EMPTY, MoveUtils.MFLAG_EN_PASSANT), board);
+                            AddEnPassantMove(Move(sq, sq - 9, (int)Defs.Pieces.EMPTY, (int)Defs.Pieces.EMPTY, MoveUtils.MFLAG_EN_PASSANT), board);
 
                         }
                         if (sq - 11 == board.enPas)
                         {
                             // add enpas move
-                            AddEnPassantMove(Move(sq, sq-11, (int)Defs.Pieces.EMPTY, (int)Defs.Pieces.EMPTY, MoveUtils.MFLAG_EN_PASSANT), board);
+                            AddEnPassantMove(Move(sq, sq - 11, (int)Defs.Pieces.EMPTY, (int)Defs.Pieces.EMPTY, MoveUtils.MFLAG_EN_PASSANT), board);
                         }
                     }
                 }
