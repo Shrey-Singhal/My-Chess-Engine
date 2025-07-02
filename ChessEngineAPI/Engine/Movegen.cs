@@ -7,8 +7,37 @@ namespace ChessEngineAPI.Engine
             return from | (to << 7) | (captured << 14) | (promoted << 20) | flag;
         }
 
+        public void AddCaptureMove(int move, Gameboard board)
+        {
+            // store the move
+            board.moveList[board.moveListStart[board.ply + 1]] = move;
+            // not scoring the moves yet.
+            board.moveScores[board.moveListStart[board.ply + 1]++] = 0;
+        }
+
+        public void AddQuietMove(int move, Gameboard board)
+        {
+            // store the move
+            board.moveList[board.moveListStart[board.ply + 1]] = move;
+            // not scoring the moves yet.
+            board.moveScores[board.moveListStart[board.ply + 1]++] = 0;
+        }
+
+        public void AddEnPassantMove(int move, Gameboard board)
+        {
+            // store the move
+            board.moveList[board.moveListStart[board.ply + 1]] = move;
+            // not scoring the moves yet.
+            board.moveScores[board.moveListStart[board.ply + 1]++] = 0;
+        }
+
         public void GenerateMoves(Gameboard board)
         {
+            // start writing the moves for next ply at the same index where the current ply ended up after move gen.
+            // if ply = 0 then moveliststart[1] = 0 too bcz we initially set moveliststart[0] = 0
+            // so essentially we are usijng moveliststart[ply] as read pointer nad moveliststart[1] as write pointer.
+            // so when adding moves to movelist we access moveliststart[ply+1] as the write pointer which tells us where to write moves
+            // and we keep incrementing moveliststart[ply+1] as we add moves.
             board.moveListStart[board.ply + 1] = board.moveListStart[board.ply];
 
             int pceType, pceNum, sq, pceIndex, pce, temp_sq, dir, index;
@@ -28,6 +57,7 @@ namespace ChessEngineAPI.Engine
                         // and if the 2 squares at the front are empty we can play the double pawn move.
                         if (Defs.RanksBrd[sq] == (int)Defs.Ranks.RANK_2 && board.pieces[sq + 20] == (int)Defs.Pieces.EMPTY)
                         {
+                            AddQuietMove(Move(sq, sq+20, (int)Defs.Pieces.EMPTY, (int)Defs.Pieces.EMPTY, MoveUtils.MFLAG_PAWN_START), board);
 
                         }
                     }
@@ -47,10 +77,14 @@ namespace ChessEngineAPI.Engine
                         if (sq + 9 == board.enPas)
                         {
                             //add enpas move
+                            AddEnPassantMove(Move(sq, sq+9, (int)Defs.Pieces.EMPTY, (int)Defs.Pieces.EMPTY, MoveUtils.MFLAG_EN_PASSANT), board);
+
                         }
                         if (sq + 11 == board.enPas)
                         {
                             // add enpas move
+                            AddEnPassantMove(Move(sq, sq+9, (int)Defs.Pieces.EMPTY, (int)Defs.Pieces.EMPTY, MoveUtils.MFLAG_EN_PASSANT), board);
+
                         }
                     }
                 }
@@ -62,7 +96,7 @@ namespace ChessEngineAPI.Engine
                         if (board.SqAttacked(Defs.Squares.F1, (int)Defs.Colours.BLACK) == Defs.Bool.FALSE
                                 && board.SqAttacked(Defs.Squares.E1, (int)Defs.Colours.BLACK) == Defs.Bool.FALSE)
                         {
-
+                            AddQuietMove(Move(Defs.Squares.E1, Defs.Squares.G1, (int)Defs.Pieces.EMPTY, (int)Defs.Pieces.EMPTY, MoveUtils.MFLAG_CASTLING), board);
                         }
                     }
                 }
@@ -75,6 +109,7 @@ namespace ChessEngineAPI.Engine
                         if (board.SqAttacked(Defs.Squares.D1, (int)Defs.Colours.BLACK) == Defs.Bool.FALSE
                                 && board.SqAttacked(Defs.Squares.E1, (int)Defs.Colours.BLACK) == Defs.Bool.FALSE)
                         {
+                            AddQuietMove(Move(Defs.Squares.E1, Defs.Squares.C1, (int)Defs.Pieces.EMPTY, (int)Defs.Pieces.EMPTY, MoveUtils.MFLAG_CASTLING), board);
 
                         }
                     }
@@ -96,7 +131,7 @@ namespace ChessEngineAPI.Engine
                         // add pawn move                        
                         if (Defs.RanksBrd[sq] == (int)Defs.Ranks.RANK_7 && board.pieces[sq - 20] == (int)Defs.Pieces.EMPTY)
                         {
-
+                            AddQuietMove(Move(sq, sq-20, (int)Defs.Pieces.EMPTY, (int)Defs.Pieces.EMPTY, MoveUtils.MFLAG_PAWN_START), board);
                         }
                     }
 
@@ -114,10 +149,13 @@ namespace ChessEngineAPI.Engine
                         if (sq - 9 == board.enPas)
                         {
                             //add enpas move
+                            AddEnPassantMove(Move(sq, sq-9, (int)Defs.Pieces.EMPTY, (int)Defs.Pieces.EMPTY, MoveUtils.MFLAG_EN_PASSANT), board);
+
                         }
                         if (sq - 11 == board.enPas)
                         {
                             // add enpas move
+                            AddEnPassantMove(Move(sq, sq-11, (int)Defs.Pieces.EMPTY, (int)Defs.Pieces.EMPTY, MoveUtils.MFLAG_EN_PASSANT), board);
                         }
                     }
                 }
@@ -129,6 +167,7 @@ namespace ChessEngineAPI.Engine
                         if (board.SqAttacked(Defs.Squares.F8, (int)Defs.Colours.WHITE) == Defs.Bool.FALSE
                                 && board.SqAttacked(Defs.Squares.E8, (int)Defs.Colours.WHITE) == Defs.Bool.FALSE)
                         {
+                            AddQuietMove(Move(Defs.Squares.E8, Defs.Squares.G8, (int)Defs.Pieces.EMPTY, (int)Defs.Pieces.EMPTY, MoveUtils.MFLAG_CASTLING), board);
 
                         }
                     }
@@ -142,7 +181,7 @@ namespace ChessEngineAPI.Engine
                         if (board.SqAttacked(Defs.Squares.D8, (int)Defs.Colours.WHITE) == Defs.Bool.FALSE
                                 && board.SqAttacked(Defs.Squares.E8, (int)Defs.Colours.WHITE) == Defs.Bool.FALSE)
                         {
-
+                            AddQuietMove(Move(Defs.Squares.E8, Defs.Squares.C8, (int)Defs.Pieces.EMPTY, (int)Defs.Pieces.EMPTY, MoveUtils.MFLAG_CASTLING), board);
                         }
                     }
                 }
@@ -173,10 +212,11 @@ namespace ChessEngineAPI.Engine
                             if (PieceProperties.PieceCol[temp_sq] != board.side)
                             {
                                 // add capture
+                                AddCaptureMove(Move(sq, temp_sq, board.pieces[temp_sq], (int)Defs.Pieces.EMPTY, 0), board);
                             }
                             else
                             {
-
+                                AddQuietMove(Move(sq, temp_sq, (int)Defs.Pieces.EMPTY, (int)Defs.Pieces.EMPTY, 0), board);
                             }
                         }
                     }
@@ -207,17 +247,19 @@ namespace ChessEngineAPI.Engine
                                 if (PieceProperties.PieceCol[temp_sq] != board.side)
                                 {
                                     // add capture
+                                    AddCaptureMove(Move(sq, temp_sq, board.pieces[temp_sq], (int)Defs.Pieces.EMPTY, 0), board);
                                 }
                                 break;
 
                             }
                             // non capture move
-                            temp_sq += dir;                                                        
-                        }                        
+                            AddQuietMove(Move(sq, temp_sq, (int)Defs.Pieces.EMPTY, (int)Defs.Pieces.EMPTY, 0), board);
+                            temp_sq += dir;
+                        }
                     }
                 }
                 pce = Defs.LoopSlidePce[pceIndex++];
-            }            
+            }
         }
     }
 }
