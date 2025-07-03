@@ -1,3 +1,5 @@
+using Microsoft.AspNetCore.Components.Web;
+
 namespace ChessEngineAPI.Engine
 {
     public class MakeMove(Gameboard board)
@@ -30,6 +32,38 @@ namespace ChessEngineAPI.Engine
             board.pceNum[pce]--;
             board.pList[Gameboard.PCEINDEX(pce, temp_pceNum)] = board.pList[Gameboard.PCEINDEX(pce, board.pceNum[pce])];
 
+        }
+
+        public void AddPiece(int sq, int pce, Gameboard board)
+        {
+            int col = (int)PieceProperties.PieceCol[pce];
+            board.HashPiece(pce, sq);
+
+            board.pieces[sq] = pce;
+            board.material[col] += PieceProperties.PieceVal[pce];
+            board.pList[Gameboard.PCEINDEX(pce, board.pceNum[pce])] = sq;
+            board.pceNum[pce]++;
+        }
+
+        public void MovePiece(int from, int to, Gameboard board)
+        {
+            int index;
+            int pce = board.pieces[from];
+
+            board.HashPiece(pce, from);
+            board.pieces[from] = (int)Defs.Pieces.EMPTY;
+
+            board.HashPiece(pce, to);
+            board.pieces[to] = pce;
+
+            for (index = 0; index < board.pceNum[pce]; ++index)
+            {
+                if (board.pList[Gameboard.PCEINDEX(pce, index)] == from)
+                {
+                    board.pList[Gameboard.PCEINDEX(pce, index)] = to;
+                    break;
+                }
+            }
         }
     }
 }
