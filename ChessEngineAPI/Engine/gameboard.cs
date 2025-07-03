@@ -294,6 +294,79 @@ namespace ChessEngineAPI.Engine
             UpdateListsMaterial();
         }
 
+        // this function is to verify internal consistencies of the board state. if something gows wrong, it logs the error and returns false
+        public int CheckBoard()
+        {
+            int[] t_pceNum = new int[13]; // Piece counts for each type
+            int[] t_material = new int[2]; // Material for white and black
+
+            // Check piece list matches actual pieces on the board
+            for (int t_piece = (int)Defs.Pieces.wP; t_piece <= (int)Defs.Pieces.bK; ++t_piece)
+            {
+                for (int t_pce_num = 0; t_pce_num < pceNum[t_piece]; ++t_pce_num)
+                {
+                    int sq120 = pList[PCEINDEX(t_piece, t_pce_num)];
+                    if (pieces[sq120] != t_piece)
+                    {
+                        Console.WriteLine("Error: Piece list inconsistent at piece {0}, index {1}, square {2}", t_piece, t_pce_num, sq120);
+                        return Defs.Bool.FALSE;
+                    }
+                }
+            }
+
+            // Build counts and material from board for comparison
+            for (int sq64 = 0; sq64 < 64; ++sq64)
+            {
+                int sq120 = Defs.SQ120(sq64);
+                int t_piece = pieces[sq120];
+                if (t_piece >= 0 && t_piece <= 12) // Defensive: only valid pieces
+                {
+                    t_pceNum[t_piece]++;
+                    if (t_piece != (int)Defs.Pieces.EMPTY)
+                    {
+                        int colour = (int)PieceProperties.PieceCol[t_piece];
+                        t_material[colour] += PieceProperties.PieceVal[t_piece];
+                    }
+                }
+            }
+
+            // Compare built piece counts to recorded counts
+            for (int t_piece = (int)Defs.Pieces.wP; t_piece <= (int)Defs.Pieces.bK; ++t_piece)
+            {
+                if (t_pceNum[t_piece] != pceNum[t_piece])
+                {
+                    Console.WriteLine("Error: Piece count mismatch for piece {0}. Count: {1}, Expected: {2}", t_piece, t_pceNum[t_piece], pceNum[t_piece]);
+                    return Defs.Bool.FALSE;
+                }
+            }
+
+            // Compare built material to recorded material
+            if (t_material[(int)Defs.Colours.WHITE] != material[(int)Defs.Colours.WHITE] ||
+                t_material[(int)Defs.Colours.BLACK] != material[(int)Defs.Colours.BLACK])
+            {
+                Console.WriteLine("Error: Material mismatch! Calculated: [{0},{1}] Stored: [{2},{3}]",
+                    t_material[(int)Defs.Colours.WHITE], t_material[(int)Defs.Colours.BLACK],
+                    material[(int)Defs.Colours.WHITE], material[(int)Defs.Colours.BLACK]);
+                return Defs.Bool.FALSE;
+            }
+
+            // Check side to move
+            if (side != Defs.Colours.WHITE && side != Defs.Colours.BLACK)
+            {
+                Console.WriteLine("Error: Invalid side to move {0}", side);
+                return Defs.Bool.FALSE;
+            }
+
+            // Check position key (Zobrist hash)
+            if (GeneratePosKey() != posKey)
+            {
+                Console.WriteLine("Error: posKey mismatch! Calculated: {0} Stored: {1}", GeneratePosKey(), posKey);
+                return Defs.Bool.FALSE;
+            }
+
+            return Defs.Bool.TRUE;
+        }
+
         public void PrintBoard()
         {
             int sq, file, rank, piece;

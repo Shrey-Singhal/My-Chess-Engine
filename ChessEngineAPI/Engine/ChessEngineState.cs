@@ -20,6 +20,7 @@ namespace ChessEngineAPI.Engine
             Movegen movegen = new();
             movegen.GenerateMoves(Board);
             movegen.PrintMoveList(Board);
+            Board.CheckBoard();
         }
 
         public void SetPositionFromFEN(string FEN)
