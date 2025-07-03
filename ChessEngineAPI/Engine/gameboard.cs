@@ -133,6 +133,38 @@ namespace ChessEngineAPI.Engine
             return finalKey;
         }
 
+        // the 4 functions below let u update the poskey without recalculating everything from scratch.
+        // used to make/unmake a move so u can quickly update the hash
+        // generateposkey() is for the ful recalculation from whole board.
+        public void HashPiece(int pce, int sq)
+        {
+            // XORs the position key with the hash for a piece on a specific square
+            posKey ^= PieceKeys[(pce * 120) + sq];
+        }
+
+        public void HashCastle()
+        {
+            // XORs the position key with the hash for the current castling rights
+            posKey ^= CastleKeys[(int)castlePerm];
+        }
+
+        public void HashSide()
+        {
+            // XORs the position key with the hash for which side is to move
+            posKey ^= SideKey;
+        }
+
+        public void HashEnPassant()
+        {
+            // XORs the position key with the hash for the en passant square (if any)
+            // Only hash if there is an en passant square
+            if (enPas != Defs.Squares.NO_SQ)
+            {
+                posKey ^= PieceKeys[enPas];
+            }
+        }
+
+
         public void ResetBoard()
         {
             // Set all 120 squares to OFFBOARD
