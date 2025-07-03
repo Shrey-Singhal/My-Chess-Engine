@@ -7,15 +7,22 @@ namespace ChessEngineAPI.Engine
         // represents chess board squares. each index shows what piece is on that square.
         public int[] pieces = new int[Defs.BRD_SQ_NUM];
         public Defs.Colours side; //which side to move next
-        public int fiftyMove; // Number of half-moves since the last pawn move or capture.
-        public int hisPly; // half moves played in the entire game
+        
+        // Number of half-moves since the last pawn move or capture.
+        // If 50 full moves (100 half-moves) occur without a capture or pawn move, the game can be declared a draw.
+        public int fiftyMove; 
+        public int hisPly; // represents real moves played in the entire game and also used to index the history array
+
+        // the history array stores game states for each real move made during the game.
+        // it basically contains a snapshot of everything that will be needed to be restored if a move is undone.
+        public List<Defs.MoveHistory> history = [];
 
         // ply is just engine calculating a certain number of moves ahead at a particular 
         // position to find the best move
         // if engine is playing black and calculating moves for black after white play a move
         // then ply 0 would be blacks options for moves and ply 1 would be whites response options to those moves and so on
         public int ply;
-        public Defs.CASTLEBIT castlePerm; // track which side can castle legally
+        public int castlePerm; // track which side can castle legally
         public int[] material = new int[2]; // total material value for black and white
         public int[] pceNum = new int[13]; // count of each piece type
 
@@ -273,10 +280,10 @@ namespace ChessEngineAPI.Engine
                 // |= is bitwise OR + assignment
                 // bcz enum is just an int under the hood you can do bitwise operations on it
                 {
-                    case 'K': castlePerm |= Defs.CASTLEBIT.WKCA; break;
-                    case 'Q': castlePerm |= Defs.CASTLEBIT.WQCA; break;
-                    case 'k': castlePerm |= Defs.CASTLEBIT.BKCA; break;
-                    case 'q': castlePerm |= Defs.CASTLEBIT.BQCA; break;
+                    case 'K': castlePerm |= (int)Defs.CASTLEBIT.WKCA; break;
+                    case 'Q': castlePerm |= (int)Defs.CASTLEBIT.WQCA; break;
+                    case 'k': castlePerm |= (int)Defs.CASTLEBIT.BKCA; break;
+                    case 'q': castlePerm |= (int)Defs.CASTLEBIT.BQCA; break;
                 }
                 fenCnt++;
             }
@@ -398,10 +405,10 @@ namespace ChessEngineAPI.Engine
             Console.WriteLine("enPas: " + enPas);
 
             string castleRights = "";
-            if ((castlePerm & Defs.CASTLEBIT.WKCA) != 0) castleRights += "K";
-            if ((castlePerm & Defs.CASTLEBIT.WQCA) != 0) castleRights += "Q";
-            if ((castlePerm & Defs.CASTLEBIT.BKCA) != 0) castleRights += "k";
-            if ((castlePerm & Defs.CASTLEBIT.BQCA) != 0) castleRights += "q";
+            if ((castlePerm & (int)Defs.CASTLEBIT.WKCA) != 0) castleRights += "K";
+            if ((castlePerm & (int)Defs.CASTLEBIT.WQCA) != 0) castleRights += "Q";
+            if ((castlePerm & (int)Defs.CASTLEBIT.BKCA) != 0) castleRights += "k";
+            if ((castlePerm & (int)Defs.CASTLEBIT.BQCA) != 0) castleRights += "q";
 
             Console.WriteLine("castle: " + castleRights);
             Console.WriteLine("key: " + posKey.ToString("X")); // hexadecimal

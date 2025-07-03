@@ -158,7 +158,7 @@ namespace ChessEngineAPI.Engine
                     }
                 }
 
-                if ((board.castlePerm & Defs.CASTLEBIT.WKCA) != 0)
+                if ((board.castlePerm & (int)Defs.CASTLEBIT.WKCA) != 0)
                 {
                     if (board.pieces[Defs.Squares.F1] == (int)Defs.Pieces.EMPTY && board.pieces[Defs.Squares.G1] == (int)Defs.Pieces.EMPTY)
                     {
@@ -170,7 +170,7 @@ namespace ChessEngineAPI.Engine
                     }
                 }
 
-                if ((board.castlePerm & Defs.CASTLEBIT.WQCA) != 0)
+                if ((board.castlePerm & (int)Defs.CASTLEBIT.WQCA) != 0)
                 {
                     if (board.pieces[Defs.Squares.D1] == (int)Defs.Pieces.EMPTY && board.pieces[Defs.Squares.C1] == (int)Defs.Pieces.EMPTY
                             && board.pieces[Defs.Squares.B1] == (int)Defs.Pieces.EMPTY)
@@ -233,7 +233,7 @@ namespace ChessEngineAPI.Engine
                     }
                 }
 
-                if ((board.castlePerm & Defs.CASTLEBIT.BKCA) != 0)
+                if ((board.castlePerm & (int)Defs.CASTLEBIT.BKCA) != 0)
                 {
                     if (board.pieces[Defs.Squares.F8] == (int)Defs.Pieces.EMPTY && board.pieces[Defs.Squares.G8] == (int)Defs.Pieces.EMPTY)
                     {
@@ -246,7 +246,7 @@ namespace ChessEngineAPI.Engine
                     }
                 }
 
-                if ((board.castlePerm & Defs.CASTLEBIT.BQCA) != 0)
+                if ((board.castlePerm & (int)Defs.CASTLEBIT.BQCA) != 0)
                 {
                     if (board.pieces[Defs.Squares.D8] == (int)Defs.Pieces.EMPTY && board.pieces[Defs.Squares.C8] == (int)Defs.Pieces.EMPTY
                             && board.pieces[Defs.Squares.B8] == (int)Defs.Pieces.EMPTY)

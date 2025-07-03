@@ -176,5 +176,32 @@ namespace ChessEngineAPI.Engine
                 return Bool.FALSE;
             }
         }
+        public class MoveHistory
+        {
+            public int move;
+            public int castlePerm;
+            public int enPas;
+            public int fiftyMove;
+            public ulong posKey;
+        }
+
+        public static readonly int[] Kings = [(int)Pieces.wK, (int)Pieces.bK];
+        // the array below will be used to update castling rights quickly whenever a move is made.
+        public static readonly int[] CastlePermArray = [
+            15, 15, 15, 15, 15, 15, 15, 15, 15, 15,
+            15, 15, 15, 15, 15, 15, 15, 15, 15, 15,
+            15, 13, 15, 15, 15, 12, 15, 15, 14, 15,
+            15, 15, 15, 15, 15, 15, 15, 15, 15, 15,
+            15, 15, 15, 15, 15, 15, 15, 15, 15, 15,
+            15, 15, 15, 15, 15, 15, 15, 15, 15, 15,
+            15, 15, 15, 15, 15, 15, 15, 15, 15, 15,
+            15, 15, 15, 15, 15, 15, 15, 15, 15, 15,
+            15, 15, 15, 15, 15, 15, 15, 15, 15, 15,
+            15,  7, 15, 15, 15,  3, 15, 15, 11, 15,
+            15, 15, 15, 15, 15, 15, 15, 15, 15, 15,
+            15, 15, 15, 15, 15, 15, 15, 15, 15, 15
+        ];
+
+
     }
 }

@@ -9,11 +9,23 @@ namespace ChessEngineAPI.Engine
         {
             Defs.InitFilesRanksBoard();
             Defs.InitSq120To64();
-
             Board = new Gameboard();
+
+            for (int index = 0; index < Defs.MAXGAMEMOVES; ++index)
+            {
+                Board.history.Add(new Defs.MoveHistory
+                {
+                    move = MoveUtils.NO_MOVE,
+                    castlePerm = 0,
+                    enPas = 0,
+                    fiftyMove = 0,
+                    posKey = 0
+                });
+            }
+
             Board.InitHashKeys(); // set up random hash keys
             Board.ParseFEN(Defs.START_FEN); // load initial position
-            Board.posKey = Board.GeneratePosKey(); // gen hash for that position
+                                            // Board.posKey = Board.GeneratePosKey(); // gen hash for that position
 
             Board.PrintBoard();
 
@@ -21,6 +33,11 @@ namespace ChessEngineAPI.Engine
             movegen.GenerateMoves(Board);
             movegen.PrintMoveList(Board);
             Board.CheckBoard();
+            MoveManager moveManager = new(Board);
+            moveManager.MakeMove(Board.moveList[0], Board);
+            Board.PrintBoard();
+            Board.CheckBoard();
+
         }
 
         public void SetPositionFromFEN(string FEN)
