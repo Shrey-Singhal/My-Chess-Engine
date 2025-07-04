@@ -100,7 +100,7 @@ namespace ChessEngineAPI.Engine
                     case Defs.Squares.C1:
                         MovePiece(Defs.Squares.A1, Defs.Squares.D1, board);
                         break;
-                    case Defs.Squares.D8:
+                    case Defs.Squares.C8:
                         MovePiece(Defs.Squares.A8, Defs.Squares.D8, board);
                         break;
                     case Defs.Squares.G1:
@@ -177,14 +177,93 @@ namespace ChessEngineAPI.Engine
             board.HashSide();
 
             // is the king in check after the move?
-            if (board.SqAttacked(board.pList[Gameboard.PCEINDEX(Defs.Kings[side], 0)], (int)board.side) == Defs.Bool.FALSE)
+            if (board.SqAttacked(board.pList[Gameboard.PCEINDEX(Defs.Kings[side], 0)], (int)board.side) == Defs.Bool.TRUE)
             {
-                // TakeMove()
-                return false;
+                TakeMove();
+                return false; 
 
             }
             return true;
 
+
+        }
+
+        public void TakeMove()
+        {
+            board.hisPly--;
+            board.ply--;
+
+            int move = board.history[board.hisPly].move;
+            int from = MoveUtils.FromSquare(move);
+            int to = MoveUtils.ToSquare(move);
+
+            if (board.enPas != Defs.Squares.NO_SQ) board.HashEnPassant();
+            board.HashCastle();
+
+            // board.history stores the current board state for each move. so basically now we restore the board to what it looked like before that move happened.
+            board.castlePerm = board.history[board.hisPly].castlePerm;
+            board.fiftyMove = board.history[board.hisPly].fiftyMove;
+            board.enPas = board.history[board.hisPly].enPas;
+
+            if (board.enPas != Defs.Squares.NO_SQ) board.HashEnPassant();
+            board.HashCastle();
+
+            board.side ^= (Defs.Colours)1;
+            board.HashSide();
+
+            //undo en passant
+            if ((MoveUtils.MFLAG_EN_PASSANT & move) != 0)
+            {
+                if (board.side == (int)Defs.Colours.WHITE)
+                {
+                    AddPiece(to - 10, (int)Defs.Pieces.bp, board);
+                }
+                else
+                {
+                    AddPiece(to + 10, (int)Defs.Pieces.wP, board);
+                }
+            }
+            //undo castling
+            else if ((MoveUtils.MFLAG_CASTLING & move) != 0)
+            {
+                switch (to)
+                {
+                    case Defs.Squares.C1:
+                        MovePiece(Defs.Squares.D1, Defs.Squares.A1, board);
+                        break;
+                    case Defs.Squares.C8:
+                        MovePiece(Defs.Squares.D8, Defs.Squares.A8, board);
+                        break;
+                    case Defs.Squares.G1:
+                        MovePiece(Defs.Squares.F1, Defs.Squares.H1, board);
+                        break;
+                    case Defs.Squares.G8:
+                        MovePiece(Defs.Squares.F8, Defs.Squares.H8, board);
+                        break;
+                    default:
+                        break;
+
+                }
+            }
+            MovePiece(to, from, board);
+
+            //restore captured piece
+            int captured = MoveUtils.CapturedPiece(move);
+            if (captured != (int)Defs.Pieces.EMPTY)
+            {
+                AddPiece(to, captured, board);
+            }
+            //undo promotion
+            if (MoveUtils.PromotedPiece(move) != (int)Defs.Pieces.EMPTY)
+            {
+                ClearPiece(from);
+                if (PieceProperties.PieceCol[MoveUtils.PromotedPiece(move)] == Defs.Colours.WHITE) {
+                    AddPiece(from, (int)Defs.Pieces.wP, board);
+                }
+                else {
+                    AddPiece(from, (int)Defs.Pieces.bp, board);
+                }
+            }
 
         }
     }

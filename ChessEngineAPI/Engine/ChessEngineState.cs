@@ -37,6 +37,9 @@ namespace ChessEngineAPI.Engine
             moveManager.MakeMove(Board.moveList[0], Board);
             Board.PrintBoard();
             Board.CheckBoard();
+            moveManager.TakeMove();
+            Board.PrintBoard();
+            Board.CheckBoard();
 
         }
 
