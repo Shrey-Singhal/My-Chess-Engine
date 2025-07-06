@@ -9,7 +9,7 @@ namespace ChessEngineAPI.Engine
         public static int Fhf { get; set; } // fail high first
         public static int Depth { get; set; } // max search depth
         public static int Time { get; set; } // time we're going to search for
-        public static int Start { get; set; } // starting time for engine
+        public static DateTime Start { get; set; } // starting time for engine
         public static bool Stop { get; set; }
         public static int Best { get; set; } //best move found
         public static bool Thinking { get; set; } // flag to indicate if the engine is currently searching
@@ -17,6 +17,32 @@ namespace ChessEngineAPI.Engine
 
     public class Search(Gameboard board, Movegen movegen, MoveManager moveManager, PerfTesting perfTesting)
     {
+
+        //this function checks whether the engine has used too much time during its search and if it has, it has to stop searching immediately
+        public static void CheckUp()
+        {
+            if ((DateTime.Now - SearchController.Start).TotalMilliseconds > SearchController.Time)
+            {
+                SearchController.Stop = true;
+            }
+        }
+
+        public bool IsRepitition()
+        {
+            int index;
+            // we do board.hisply - board.fiftymove because we are trying to see if the current position has occurred since the last pawn move or capture.
+            // also bcz board.hisply is the current position, we loop up to board.hisply-1 to check past positions
+            for (index = board.hisPly - board.fiftyMove; index < board.hisPly - 1; ++index)
+            {
+                // if we find the same position hash then its a repitition
+                if (board.posKey == board.history[index].posKey)
+                {
+                    return true;
+                }
+            }
+            return false;            
+        }
+
         // alpha: the best score found so far for the maximizer (lower bound).
         // beta: the best score found so far for the minimizer (upper bound).
         // depth: how many plies (half-moves) deep we want to search.
@@ -28,9 +54,22 @@ namespace ChessEngineAPI.Engine
                 //return evaluate()
 
             }
+            // call check up every 2048 nodes.
+            if ((SearchController.Nodes & 2047) == 0)
+            {
+                CheckUp();
+            }
+
             //check time up
             SearchController.Nodes++;
-            // check Rep() fifty move rule
+
+            // this checks for 2 draw conditions:
+            // isrepitition (if the current position has repeated) and if 50 fullmoves passed with no pawn move or capture
+            // board.ply != 0 ensures we’re not at the root node, to avoid false triggers
+            if ((IsRepitition() || board.fiftyMove >= 100) && board.ply != 0)
+            {
+                return 0;
+            }
 
             //this is to prevent going beyond engine's max allowed depth
             if (board.ply > Defs.MAXDEPTH - 1)
