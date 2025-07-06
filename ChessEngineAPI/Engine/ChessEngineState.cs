@@ -4,12 +4,20 @@ namespace ChessEngineAPI.Engine
     {
         // auto property with a public getter and a private setter so that only this class can modify the board.
         public Gameboard Board { get; private set; }
+        private readonly Movegen movegen;
+        private readonly MoveManager moveManager;
+        private readonly PerfTesting perfTesting;
 
         public ChessEngineState()
         {
-            Defs.InitFilesRanksBoard();
-            Defs.InitSq120To64();
             Board = new Gameboard();
+            movegen = new();
+            moveManager = new(Board);
+            perfTesting = new(Board);
+
+            Defs.InitFilesRanksBoard();
+            Board.InitHashKeys(); // set up random hash keys            
+            Defs.InitSq120To64();
 
             for (int index = 0; index < Defs.MAXGAMEMOVES; ++index)
             {
@@ -23,35 +31,32 @@ namespace ChessEngineAPI.Engine
                 });
             }
 
-            Board.InitHashKeys(); // set up random hash keys
+
             Board.ParseFEN(Defs.START_FEN); // load initial position
                                             // Board.posKey = Board.GeneratePosKey(); // gen hash for that position
 
             Board.PrintBoard();
 
-            Movegen movegen = new();
-            movegen.GenerateMoves(Board);
-            movegen.PrintMoveList(Board);
-            Board.CheckBoard();
-            MoveManager moveManager = new(Board);
-            moveManager.MakeMove(Board.moveList[0], Board);
-            Board.PrintBoard();
-            Board.CheckBoard();
-            moveManager.TakeMove();
-            Board.PrintBoard();
-            Board.CheckBoard();
+
+            // movegen.GenerateMoves(Board);
+            // movegen.PrintMoveList(Board);
+            // Board.CheckBoard();
+
+            // moveManager.MakeMove(Board.moveList[0], Board);
+            // Board.PrintBoard();
+            // Board.CheckBoard();
+            // moveManager.TakeMove();
+            // Board.PrintBoard();
+            // Board.CheckBoard();
 
         }
 
         public void SetPositionFromFEN(string FEN)
         {
             Board.ParseFEN(FEN);
-            Board.posKey = Board.GeneratePosKey();
             Board.PrintBoard();
 
-            Movegen movegen = new();
-            movegen.GenerateMoves(Board);
-            movegen.PrintMoveList(Board);
+            perfTesting.PerftTest(5);
         }
     }
 }

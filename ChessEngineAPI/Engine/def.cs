@@ -153,7 +153,7 @@ namespace ChessEngineAPI.Engine
         public static readonly int[] KnDir = [-8, -19, -21, -12, 8, 19, 21, 12];
         public static readonly int[] RkDir = [-1, -10, 1, 10];
         public static readonly int[] BiDir = [-9, -11, 11, 9];
-        public static readonly int[] KiDir = [1, -10, 1, 10, -9, -11, 11, 9];
+        public static readonly int[] KiDir = [-1, -10, 1, 10, -9, -11, 11, 9];
 
         // the array below represents how many directions each piece can move in
         public static readonly int[] DirNum = [0, 0, 8, 4, 4, 8, 8, 0, 8, 4, 4, 8, 8];

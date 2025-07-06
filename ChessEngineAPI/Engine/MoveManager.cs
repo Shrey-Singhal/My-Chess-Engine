@@ -93,7 +93,7 @@ namespace ChessEngineAPI.Engine
                     ClearPiece(to + 10);
                 }
             }
-            else if ((move % MoveUtils.MFLAG_CASTLING) != 0)
+            else if ((move & MoveUtils.MFLAG_CASTLING) != 0)
             {
                 switch (to)
                 {

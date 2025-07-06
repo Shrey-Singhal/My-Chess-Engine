@@ -37,8 +37,9 @@ namespace ChessEngineAPI.Engine
             {
                 AddCaptureMove(Move(from, to, cap, (int)Defs.Pieces.wQ, 0), board);
                 AddCaptureMove(Move(from, to, cap, (int)Defs.Pieces.wR, 0), board);
-                AddCaptureMove(Move(from, to, cap, (int)Defs.Pieces.wN, 0), board);
                 AddCaptureMove(Move(from, to, cap, (int)Defs.Pieces.wB, 0), board);
+                AddCaptureMove(Move(from, to, cap, (int)Defs.Pieces.wN, 0), board);
+                
             }
             else
             {
@@ -53,8 +54,8 @@ namespace ChessEngineAPI.Engine
             {
                 AddCaptureMove(Move(from, to, cap, (int)Defs.Pieces.bQ, 0), board);
                 AddCaptureMove(Move(from, to, cap, (int)Defs.Pieces.bR, 0), board);
-                AddCaptureMove(Move(from, to, cap, (int)Defs.Pieces.bN, 0), board);
                 AddCaptureMove(Move(from, to, cap, (int)Defs.Pieces.bB, 0), board);
+                AddCaptureMove(Move(from, to, cap, (int)Defs.Pieces.bN, 0), board);                
             }
             else
             {
@@ -69,8 +70,8 @@ namespace ChessEngineAPI.Engine
             {
                 AddQuietMove(Move(from, to, (int)Defs.Pieces.EMPTY, (int)Defs.Pieces.wQ, 0), board);
                 AddQuietMove(Move(from, to, (int)Defs.Pieces.EMPTY, (int)Defs.Pieces.wR, 0), board);
-                AddQuietMove(Move(from, to, (int)Defs.Pieces.EMPTY, (int)Defs.Pieces.wN, 0), board);
                 AddQuietMove(Move(from, to, (int)Defs.Pieces.EMPTY, (int)Defs.Pieces.wB, 0), board);
+                AddQuietMove(Move(from, to, (int)Defs.Pieces.EMPTY, (int)Defs.Pieces.wN, 0), board);
             }
             else
             {
@@ -85,8 +86,8 @@ namespace ChessEngineAPI.Engine
             {
                 AddQuietMove(Move(from, to, (int)Defs.Pieces.EMPTY, (int)Defs.Pieces.bQ, 0), board);
                 AddQuietMove(Move(from, to, (int)Defs.Pieces.EMPTY, (int)Defs.Pieces.bR, 0), board);
-                AddQuietMove(Move(from, to, (int)Defs.Pieces.EMPTY, (int)Defs.Pieces.bN, 0), board);
                 AddQuietMove(Move(from, to, (int)Defs.Pieces.EMPTY, (int)Defs.Pieces.bB, 0), board);
+                AddQuietMove(Move(from, to, (int)Defs.Pieces.EMPTY, (int)Defs.Pieces.bN, 0), board);                
             }
             else
             {
@@ -137,7 +138,7 @@ namespace ChessEngineAPI.Engine
                     if (Defs.SQOFFBOARD(sq + 11) == Defs.Bool.FALSE && PieceProperties.PieceCol[board.pieces[sq + 11]] == Defs.Colours.BLACK)
                     {
                         // add pawn capture move
-                        AddWhitePawnCaptureMove(sq, sq + 11, board.pieces[sq + 9], board);
+                        AddWhitePawnCaptureMove(sq, sq + 11, board.pieces[sq + 11], board);
                     }
 
                     // check if there's a valid en passant target square in the board.
@@ -152,7 +153,7 @@ namespace ChessEngineAPI.Engine
                         if (sq + 11 == board.enPas)
                         {
                             // add enpas move
-                            AddEnPassantMove(Move(sq, sq + 9, (int)Defs.Pieces.EMPTY, (int)Defs.Pieces.EMPTY, MoveUtils.MFLAG_EN_PASSANT), board);
+                            AddEnPassantMove(Move(sq, sq + 11, (int)Defs.Pieces.EMPTY, (int)Defs.Pieces.EMPTY, MoveUtils.MFLAG_EN_PASSANT), board);
 
                         }
                     }
