@@ -202,6 +202,9 @@ namespace ChessEngineAPI.Engine
             15, 15, 15, 15, 15, 15, 15, 15, 15, 15
         ];
 
+        public const int INFINITE = 30000;
+
+        public const int MATE = 29000;
 
     }
 }
