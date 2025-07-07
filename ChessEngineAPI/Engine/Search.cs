@@ -17,6 +17,15 @@ namespace ChessEngineAPI.Engine
 
     public class Search(Gameboard board, Movegen movegen, MoveManager moveManager, PerfTesting perfTesting)
     {
+        //clear pvtable
+        public void ClearPvTable()
+        {
+            for (int index = 0; index < Defs.PVENTRIES; index++)
+            {
+                board.PvTable[index].move = MoveUtils.NO_MOVE;
+                board.PvTable[index].posKey = 0;
+            }
+        }
 
         //this function checks whether the engine has used too much time during its search and if it has, it has to stop searching immediately
         public static void CheckUp()
@@ -75,6 +84,16 @@ namespace ChessEngineAPI.Engine
             if (board.ply > Defs.MAXDEPTH - 1)
             {
                 return Evaluate.EvalPosition(board);
+            }
+
+            //check if the king is in check
+            int InCheck = board.SqAttacked(board.pList[Gameboard.PCEINDEX(Defs.Kings[(int)board.side], 0)], (int)board.side ^ 1);
+
+            // add one extra depth to the search if the king is in check.
+            // this is a common trick in chess engines to search deeper in critical positions (like when you're in check).
+            if (InCheck == Defs.Bool.TRUE)
+            {
+                depth++;
             }
 
             int Score = -Defs.INFINITE; //stores current move's evaluation
@@ -137,23 +156,66 @@ namespace ChessEngineAPI.Engine
                 }
 
             }
-            // Mate check
+            // check if the player has no legal moves left - could be checkmate or stalemate
+
+            if (Legal == 0)
+            {
+                if (InCheck == Defs.Bool.TRUE)
+                {
+                    //lets assume ply=4 (we're 4 half moves deep)
+                    //return -28996 (29000-4) this means checkmate in 4 half moves (2 full moves)
+                    // essentially it represents how close a mate is and its negative cz its a loss
+                    // the engine uses this to prefer faster mates and avoid slower losses
+                    return -Defs.MATE + board.ply;
+                }
+                else
+                {
+                    return 0; // stalemate so return draw
+                }
+            }
 
             if (alpha != OldAlpha)
             {
-                //store PvMove
+                PvTable.StorePvMove(board, BestMove);
             }
 
             return alpha;
 
         }
+        // this function resets the search state before starting a new search.
+        // we need to reset bcz the information stored before was based on previous board state
+        public void ClearForSearch()
+        {
+            int index, index2;
+            for (index = 0; index < 14 * Defs.BRD_SQ_NUM; ++index)
+            {
+                board.searchHistory[index] = 0;
+            }
+
+            for (index2 = 0; index2 < 3 * Defs.MAXDEPTH; ++index2)
+            {
+                board.searchKillers[index] = 0;
+            }
+
+            ClearPvTable();
+
+            board.ply = 0;
+            SearchController.Nodes = 0;
+            SearchController.Fh = 0;
+            SearchController.Fhf = 0;
+            SearchController.Start = DateTime.Now;
+            SearchController.Stop = false;
+        } 
+
 
         public void SearchPosition()
         {
             int bestMove = MoveUtils.NO_MOVE;
             int bestScore = Defs.INFINITE;
             int currentDepth = 0;
-            
+
+            ClearForSearch();
+
             // starts a loop for iterative deepening search
             for (currentDepth = 1; currentDepth <= SearchController.Depth; ++currentDepth)
             {

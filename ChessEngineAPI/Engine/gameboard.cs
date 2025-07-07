@@ -68,7 +68,13 @@ namespace ChessEngineAPI.Engine
         public int[] moveScores = new int[Defs.MAXDEPTH * Defs.MAXPOSITIONMOVES];
         public int[] moveListStart = new int[Defs.MAXDEPTH];
 
-        public struct PvEntry {
+        //global store table for quiet non capture moves. it tracks which moves have helped cause cutoffs(beta pruning)
+        public int[] searchHistory = new int[14 * Defs.BRD_SQ_NUM];
+        //stores specific quiet moves that caused cutoffs at a certain depth.
+        public int[] searchKillers = new int[3 * Defs.MAXDEPTH];
+
+        public struct PvEntry
+        {
             public int move;
             public ulong posKey;
         }
