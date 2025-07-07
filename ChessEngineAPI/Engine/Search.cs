@@ -15,7 +15,7 @@ namespace ChessEngineAPI.Engine
         public static bool Thinking { get; set; } // flag to indicate if the engine is currently searching
     }
 
-    public class Search(Gameboard board, Movegen movegen, MoveManager moveManager, PerfTesting perfTesting, Evaluate evaluate)
+    public class Search(Gameboard board, Movegen movegen, MoveManager moveManager, PerfTesting perfTesting)
     {
 
         //this function checks whether the engine has used too much time during its search and if it has, it has to stop searching immediately
@@ -51,7 +51,7 @@ namespace ChessEngineAPI.Engine
             // base condition. once we've reached max depth, return an evaluation of the current position
             if (depth <= 0)
             {
-                return evaluate.EvalPosition(board);
+                return Evaluate.EvalPosition(board);
 
             }
             // call check up every 2048 nodes.
@@ -74,7 +74,7 @@ namespace ChessEngineAPI.Engine
             //this is to prevent going beyond engine's max allowed depth
             if (board.ply > Defs.MAXDEPTH - 1)
             {
-                return evaluate.EvalPosition(board);
+                return Evaluate.EvalPosition(board);
             }
 
             int Score = -Defs.INFINITE; //stores current move's evaluation

@@ -1,11 +1,11 @@
 namespace ChessEngineAPI.Engine
 {
 
-    public class Evaluate
+    public static class Evaluate
     {
         // positional evaluation table for pawns - each square on the board is given a value.
         // the values represent how favourable it is for a white pawn to stand on that square.
-        public int[] PawnTable = [
+        public static readonly int[] PawnTable = [
             0   ,   0   ,   0   ,   0   ,   0   ,   0   ,   0   ,   0   ,
             10  ,   10  ,   0   ,   -10 ,   -10 ,   0   ,   10  ,   10  ,
             5   ,   0   ,   0   ,   5   ,   5   ,   0   ,   0   ,   5   ,
@@ -16,7 +16,7 @@ namespace ChessEngineAPI.Engine
             0   ,   0   ,   0   ,   0   ,   0   ,   0   ,   0   ,   0
         ];
 
-        public int[] KnightTable = [
+        public static readonly int[] KnightTable = [
             0   ,   -10 ,   0   ,   0   ,   0   ,   0   ,   -10 ,   0   ,
             0   ,   0   ,   0   ,   5   ,   5   ,   0   ,   0   ,   0   ,
             0   ,   0   ,   10  ,   10  ,   10  ,   10  ,   0   ,   0   ,
@@ -27,7 +27,7 @@ namespace ChessEngineAPI.Engine
             0   ,   0   ,   0   ,   0   ,   0   ,   0   ,   0   ,   0
         ];
 
-        public int[] BishopTable = [
+        public static readonly int[] BishopTable = [
             0   ,   0   ,   -10 ,   0   ,   0   ,   -10 ,   0   ,   0   ,
             0   ,   0   ,   0   ,   10  ,   10  ,   0   ,   0   ,   0   ,
             0   ,   0   ,   10  ,   15  ,   15  ,   10  ,   0   ,   0   ,
@@ -38,7 +38,7 @@ namespace ChessEngineAPI.Engine
             0   ,   0   ,   0   ,   0   ,   0   ,   0   ,   0   ,   0
         ];
 
-        public int[] RookTable = [
+        public static readonly int[] RookTable = [
             0   ,   0   ,   5   ,   10  ,   10  ,   5   ,   0   ,   0   ,
             0   ,   0   ,   5   ,   10  ,   10  ,   5   ,   0   ,   0   ,
             0   ,   0   ,   5   ,   10  ,   10  ,   5   ,   0   ,   0   ,
@@ -50,7 +50,7 @@ namespace ChessEngineAPI.Engine
         ];
 
         public const int BishopPair = 40; //bishop pair bonues - classic chess engine heuristic
-        public int EvalPosition(Gameboard board)
+        public static int EvalPosition(Gameboard board)
         {
             int score = board.material[(int)Defs.Colours.WHITE] - board.material[(int)Defs.Colours.BLACK];
 

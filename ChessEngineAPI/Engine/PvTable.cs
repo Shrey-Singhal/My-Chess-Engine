@@ -1,9 +1,9 @@
 namespace ChessEngineAPI.Engine
 {
-    public class PvTable(Gameboard board)
+    public static class PvTable
     {
         // looks up the best move for current position in PvTable
-        public int ProbePvTable()
+        public static int ProbePvTable(Gameboard board)
         {
             int index = (int)(board.posKey % (ulong)Defs.PVENTRIES);
             //checks if the stored key at that index matches the current position
