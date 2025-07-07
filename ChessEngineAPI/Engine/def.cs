@@ -205,7 +205,8 @@ namespace ChessEngineAPI.Engine
         public const int INFINITE = 30000;
 
         public const int MATE = 29000;
-
+        public const int PVENTRIES = 10000;
+        
         // this is a table that flips a square from White's perspective view to Black's (when the engine play black)
         // this is so that we can access evaluation tables for both sides
         // Exampel - Mirror64[12] = 52 -> e2 becomes e7

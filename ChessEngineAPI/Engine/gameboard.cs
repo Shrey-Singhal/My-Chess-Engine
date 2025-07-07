@@ -7,7 +7,7 @@ namespace ChessEngineAPI.Engine
         // represents chess board squares. each index shows what piece is on that square.
         public int[] pieces = new int[Defs.BRD_SQ_NUM];
         public Defs.Colours side; //which side to move next
-        
+
         // Number of half-moves since the last pawn move or capture.
         // If 50 full moves (100 half-moves) occur without a capture or pawn move, the game can be declared a draw.
         public int fiftyMove; 
@@ -68,6 +68,18 @@ namespace ChessEngineAPI.Engine
         public int[] moveScores = new int[Defs.MAXDEPTH * Defs.MAXPOSITIONMOVES];
         public int[] moveListStart = new int[Defs.MAXDEPTH];
 
+        public struct PvEntry {
+            public int move;
+            public ulong posKey;
+        }
+        //pvtable is a big array where each entry stores a position key and the best move found from that position.
+        //This helps speed up the engine by using move ordering (trying the best-known move first).
+        public PvEntry[] PvTable = new PvEntry[Defs.PVENTRIES];
+        //pvline stores the best full line of moves
+        public int[] PvArray = new int[Defs.MAXDEPTH];
+
+        
+
         public Gameboard()
         {
             side = Defs.Colours.WHITE;
@@ -84,7 +96,7 @@ namespace ChessEngineAPI.Engine
             pList = new int[14 * 10];
             PieceKeys = new ulong[14 * 120];
             CastleKeys = new ulong[16];
-            
+
             moveList = new int[Defs.MAXDEPTH * Defs.MAXPOSITIONMOVES];
             moveScores = new int[Defs.MAXDEPTH * Defs.MAXPOSITIONMOVES];
             moveListStart = new int[Defs.MAXDEPTH];
