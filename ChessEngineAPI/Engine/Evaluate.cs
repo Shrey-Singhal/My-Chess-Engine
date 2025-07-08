@@ -111,13 +111,13 @@ namespace ChessEngineAPI.Engine
             pce = (int)Defs.Pieces.wQ;	
             for(pceNum = 0; pceNum < board.pceNum[pce]; ++pceNum) {
                 sq = board.pList[Gameboard.PCEINDEX(pce, pceNum)];
-                score += RookTable[Defs.SQ64(sq)]/2;
+                score += RookTable[Defs.SQ64(sq)];
             }	
 
             pce = (int)Defs.Pieces.bQ;	
             for(pceNum = 0; pceNum < board.pceNum[pce]; ++pceNum) {
                 sq = board.pList[Gameboard.PCEINDEX(pce, pceNum)];
-                score -= RookTable[Defs.MIRROR64(Defs.SQ64(sq))]/2;
+                score -= RookTable[Defs.MIRROR64(Defs.SQ64(sq))];
             }	
             
 

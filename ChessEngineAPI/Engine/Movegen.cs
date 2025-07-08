@@ -39,7 +39,7 @@ namespace ChessEngineAPI.Engine
                 AddCaptureMove(Move(from, to, cap, (int)Defs.Pieces.wR, 0), board);
                 AddCaptureMove(Move(from, to, cap, (int)Defs.Pieces.wB, 0), board);
                 AddCaptureMove(Move(from, to, cap, (int)Defs.Pieces.wN, 0), board);
-                
+
             }
             else
             {
@@ -55,7 +55,7 @@ namespace ChessEngineAPI.Engine
                 AddCaptureMove(Move(from, to, cap, (int)Defs.Pieces.bQ, 0), board);
                 AddCaptureMove(Move(from, to, cap, (int)Defs.Pieces.bR, 0), board);
                 AddCaptureMove(Move(from, to, cap, (int)Defs.Pieces.bB, 0), board);
-                AddCaptureMove(Move(from, to, cap, (int)Defs.Pieces.bN, 0), board);                
+                AddCaptureMove(Move(from, to, cap, (int)Defs.Pieces.bN, 0), board);
             }
             else
             {
@@ -87,7 +87,7 @@ namespace ChessEngineAPI.Engine
                 AddQuietMove(Move(from, to, (int)Defs.Pieces.EMPTY, (int)Defs.Pieces.bQ, 0), board);
                 AddQuietMove(Move(from, to, (int)Defs.Pieces.EMPTY, (int)Defs.Pieces.bR, 0), board);
                 AddQuietMove(Move(from, to, (int)Defs.Pieces.EMPTY, (int)Defs.Pieces.bB, 0), board);
-                AddQuietMove(Move(from, to, (int)Defs.Pieces.EMPTY, (int)Defs.Pieces.bN, 0), board);                
+                AddQuietMove(Move(from, to, (int)Defs.Pieces.EMPTY, (int)Defs.Pieces.bN, 0), board);
             }
             else
             {
@@ -281,11 +281,14 @@ namespace ChessEngineAPI.Engine
                             continue;
                         }
 
-                        if (board.pieces[temp_sq] == (int)Defs.Pieces.EMPTY) {
+                        if (board.pieces[temp_sq] == (int)Defs.Pieces.EMPTY)
+                        {
                             AddQuietMove(Move(sq, temp_sq, (int)Defs.Pieces.EMPTY, (int)Defs.Pieces.EMPTY, 0), board);
-                        } else if (PieceProperties.PieceCol[board.pieces[temp_sq]] != board.side) {
+                        }
+                        else if (PieceProperties.PieceCol[board.pieces[temp_sq]] != board.side)
+                        {
                             AddCaptureMove(Move(sq, temp_sq, board.pieces[temp_sq], (int)Defs.Pieces.EMPTY, 0), board);
-                        }                        
+                        }
                     }
                 }
                 pce = Defs.LoopNonSlidePce[pceIndex++];
@@ -372,6 +375,27 @@ namespace ChessEngineAPI.Engine
                 move = board.moveList[index];
                 Console.WriteLine(PrintMove(move));
             }
+        }
+        public bool MoveExists(Gameboard board, MoveManager moveManager, int move)
+        {
+            GenerateMoves(board); //fill movelist with moves
+            int index;
+            int moveFound = MoveUtils.NO_MOVE;
+            //iterate over the move list at the current ply
+            for (index = board.moveListStart[board.ply]; index < board.moveListStart[board.ply + 1]; ++index)
+            {
+                moveFound = board.moveList[index];
+                if (!moveManager.MakeMove(moveFound, board))
+                {
+                    continue;
+                }
+                moveManager.TakeMove();
+                if (move == moveFound)
+                {
+                    return true;
+                }
+            }
+            return false;
         }
     }
 }

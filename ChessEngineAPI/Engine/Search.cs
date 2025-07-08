@@ -57,6 +57,7 @@ namespace ChessEngineAPI.Engine
         // depth: how many plies (half-moves) deep we want to search.
         public int AlphaBeta(int alpha, int beta, int depth)
         {
+            SearchController.Nodes++;
             // base condition. once we've reached max depth, return an evaluation of the current position
             if (depth <= 0)
             {
@@ -68,9 +69,6 @@ namespace ChessEngineAPI.Engine
             {
                 CheckUp();
             }
-
-            //check time up
-            SearchController.Nodes++;
 
             // this checks for 2 draw conditions:
             // isrepitition (if the current position has repeated) and if 50 fullmoves passed with no pawn move or capture
@@ -98,6 +96,7 @@ namespace ChessEngineAPI.Engine
 
             int Score = -Defs.INFINITE; //stores current move's evaluation
             movegen.GenerateMoves(board);
+
 
             int MoveNum = 0;
             int Legal = 0; // counts legal moves (needed to detect checkmate/stalemate)
@@ -156,6 +155,9 @@ namespace ChessEngineAPI.Engine
                 }
 
             }
+
+            
+
             // check if the player has no legal moves left - could be checkmate or stalemate
 
             if (Legal == 0)
@@ -194,7 +196,7 @@ namespace ChessEngineAPI.Engine
 
             for (index2 = 0; index2 < 3 * Defs.MAXDEPTH; ++index2)
             {
-                board.searchKillers[index] = 0;
+                board.searchKillers[index2] = 0;
             }
 
             ClearPvTable();
@@ -211,19 +213,38 @@ namespace ChessEngineAPI.Engine
         public void SearchPosition()
         {
             int bestMove = MoveUtils.NO_MOVE;
-            int bestScore = Defs.INFINITE;
-            int currentDepth = 0;
+            int bestScore = -Defs.INFINITE;
+            int currentDepth;
+            string line;
+            int pvNum;
 
             ClearForSearch();
+            SearchController.Time = 10000; // 10 seconds
 
             // starts a loop for iterative deepening search
-            for (currentDepth = 1; currentDepth <= SearchController.Depth; ++currentDepth)
+            for (currentDepth = 1; currentDepth <= /*SearchController.Depth */ 5; ++currentDepth)
             {
+                bestScore = AlphaBeta(-Defs.INFINITE, Defs.INFINITE, currentDepth);
                 if (SearchController.Stop) //breaks early if search us inturrupted
                 {
                     break;
                 }
+
+                bestMove = PvTable.ProbePvTable(board);
+                line = "D:" + currentDepth + " Best: " + movegen.PrintMove(bestMove) + " Score: " + bestScore
+                            + " nodes: " + SearchController.Nodes;
+
+                pvNum = PvTable.GetPvLine(board, currentDepth, movegen, moveManager);
+                line += "Pv:";
+
+                for (int c = 0; c < pvNum; ++c)
+                {
+                    line += " " + movegen.PrintMove(board.PvArray[c]);
+                }
+                
+                Console.WriteLine(line);
             }
+            
 
             SearchController.Best = bestMove;
             SearchController.Thinking = false;

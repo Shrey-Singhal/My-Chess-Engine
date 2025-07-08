@@ -65,7 +65,7 @@ namespace ChessEngineAPI.Engine
         public const int BRD_SQ_NUM = 120;
 
         // these 2 lists contain file index and rank index for each square
-        public static readonly int[] FilesBrd = new int[BRD_SQ_NUM];
+        public static int[] FilesBrd = new int[BRD_SQ_NUM];
         public static readonly int[] RanksBrd = new int[BRD_SQ_NUM];
 
         public static void InitFilesRanksBoard()
@@ -206,7 +206,7 @@ namespace ChessEngineAPI.Engine
 
         public const int MATE = 29000;
         public const int PVENTRIES = 10000;
-        
+
         // this is a table that flips a square from White's perspective view to Black's (when the engine play black)
         // this is so that we can access evaluation tables for both sides
         // Exampel - Mirror64[12] = 52 -> e2 becomes e7

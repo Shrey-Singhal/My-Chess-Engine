@@ -23,6 +23,38 @@ namespace ChessEngineAPI.Engine
 
             board.PvTable[index].posKey = board.posKey;
             board.PvTable[index].move = move;
-        }        
+        }
+        //this function rebuilds and returns the best line of play that engine has found upto a given depth
+        public static int GetPvLine(Gameboard board, int depth, Movegen movegen, MoveManager moveManager)
+        {
+            int move = PvTable.ProbePvTable(board); // Get the best move from the PV table
+            int count = 0;
+
+            // loop until the desired depth is reached or the table doesnt return a move
+            while (move != MoveUtils.NO_MOVE && count < depth)
+            {
+                //check if the move is legal in the current position
+                if (movegen.MoveExists(board, moveManager, move))
+                {
+                    moveManager.MakeMove(move, board); // Make the move to progress the PV line
+                    board.PvArray[count++] = move;     // Store the move in the PV array
+                }
+                else
+                {
+                    break; // Exit if the move is not legal
+                }
+
+                move = PvTable.ProbePvTable(board); // Probe the next PV move for the updated board state
+            }
+
+            // Take back all moves to return board to original state
+            while (board.ply > 0)
+            {
+                moveManager.TakeMove();
+            }
+
+            return count; // Return the number of moves in the PV line
+        }
+        
     }
 }

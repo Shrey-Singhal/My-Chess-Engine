@@ -7,6 +7,7 @@ namespace ChessEngineAPI.Engine
         private readonly Movegen movegen;
         private readonly MoveManager moveManager;
         private readonly PerfTesting perfTesting;
+        private readonly Search search;
 
         public ChessEngineState()
         {
@@ -14,6 +15,7 @@ namespace ChessEngineAPI.Engine
             movegen = new();
             moveManager = new(Board);
             perfTesting = new(Board);
+            search = new(Board, movegen, moveManager, perfTesting);
 
             Defs.InitFilesRanksBoard();
             Board.InitHashKeys(); // set up random hash keys            
@@ -30,6 +32,15 @@ namespace ChessEngineAPI.Engine
                     posKey = 0
                 });
             }
+            for (int index = 0; index < Defs.PVENTRIES; ++index)
+            {
+                Board.PvTable[index] = new Gameboard.PvEntry
+                {
+                    move = MoveUtils.NO_MOVE,
+                    posKey = 0
+                };
+            }
+
 
 
             Board.ParseFEN(Defs.START_FEN); // load initial position
@@ -56,7 +67,8 @@ namespace ChessEngineAPI.Engine
             Board.ParseFEN(FEN);
             Board.PrintBoard();
 
-            perfTesting.PerftTest(5);
+            search.SearchPosition();
+            Console.WriteLine("Success");
         }
     }
 }
