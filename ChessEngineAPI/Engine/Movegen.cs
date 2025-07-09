@@ -332,6 +332,154 @@ namespace ChessEngineAPI.Engine
             }
         }
 
+        public void GenerateCaptures(Gameboard board)
+        {
+            board.moveListStart[board.ply + 1] = board.moveListStart[board.ply];
+
+            int pceType, pceNum, sq, pceIndex, pce, temp_sq, dir, index;
+
+            if (board.side == Defs.Colours.WHITE)
+            {
+                pceType = (int)Defs.Pieces.wP;
+
+                for (pceNum = 0; pceNum < board.pceNum[pceType]; ++pceNum)
+                {
+                    sq = board.pList[Gameboard.PCEINDEX(pceType, pceNum)];
+
+                    if (Defs.SQOFFBOARD(sq + 9) == Defs.Bool.FALSE && PieceProperties.PieceCol[board.pieces[sq + 9]] == Defs.Colours.BLACK)
+                    {
+                        // add pawn capture move
+                        AddWhitePawnCaptureMove(sq, sq + 9, board.pieces[sq + 9], board);
+                    }
+                    if (Defs.SQOFFBOARD(sq + 11) == Defs.Bool.FALSE && PieceProperties.PieceCol[board.pieces[sq + 11]] == Defs.Colours.BLACK)
+                    {
+                        // add pawn capture move
+                        AddWhitePawnCaptureMove(sq, sq + 11, board.pieces[sq + 11], board);
+                    }
+
+                    // check if there's a valid en passant target square in the board.
+                    if (board.enPas != Defs.Squares.NO_SQ)
+                    {
+                        if (sq + 9 == board.enPas)
+                        {
+                            //add enpas move
+                            AddEnPassantMove(Move(sq, sq + 9, (int)Defs.Pieces.EMPTY, (int)Defs.Pieces.EMPTY, MoveUtils.MFLAG_EN_PASSANT), board);
+
+                        }
+                        if (sq + 11 == board.enPas)
+                        {
+                            // add enpas move
+                            AddEnPassantMove(Move(sq, sq + 11, (int)Defs.Pieces.EMPTY, (int)Defs.Pieces.EMPTY, MoveUtils.MFLAG_EN_PASSANT), board);
+
+                        }
+                    }
+                }
+            }
+            else
+            {
+                pceType = (int)Defs.Pieces.bp;
+
+                for (pceNum = 0; pceNum < board.pceNum[pceType]; ++pceNum)
+                {
+                    sq = board.pList[Gameboard.PCEINDEX(pceType, pceNum)];
+
+                    if (Defs.SQOFFBOARD(sq - 9) == Defs.Bool.FALSE && PieceProperties.PieceCol[board.pieces[sq - 9]] == Defs.Colours.WHITE)
+                    {
+                        // add pawn capture move
+                        AddBlackPawnCaptureMove(sq, sq - 9, board.pieces[sq - 9], board);
+                    }
+                    if (Defs.SQOFFBOARD(sq - 11) == Defs.Bool.FALSE && PieceProperties.PieceCol[board.pieces[sq - 11]] == Defs.Colours.WHITE)
+                    {
+                        // add pawn capture move
+                        AddBlackPawnCaptureMove(sq, sq - 11, board.pieces[sq - 11], board);
+                    }
+
+                    if (board.enPas != Defs.Squares.NO_SQ)
+                    {
+                        if (sq - 9 == board.enPas)
+                        {
+                            //add enpas move
+                            AddEnPassantMove(Move(sq, sq - 9, (int)Defs.Pieces.EMPTY, (int)Defs.Pieces.EMPTY, MoveUtils.MFLAG_EN_PASSANT), board);
+
+                        }
+                        if (sq - 11 == board.enPas)
+                        {
+                            // add enpas move
+                            AddEnPassantMove(Move(sq, sq - 11, (int)Defs.Pieces.EMPTY, (int)Defs.Pieces.EMPTY, MoveUtils.MFLAG_EN_PASSANT), board);
+                        }
+                    }
+                }                
+            }
+            // move gen logic for non sliding pieces
+            pceIndex = Defs.LoopNonSlideIndex[(int)board.side];
+            pce = Defs.LoopNonSlidePce[pceIndex++];
+
+            while (pce != 0)
+            {
+                // visit all squares occupied by a parrticular piece
+                for (pceNum = 0; pceNum < board.pceNum[pce]; ++pceNum)
+                {
+                    sq = board.pList[Gameboard.PCEINDEX(pce, pceNum)];
+
+                    for (index = 0; index < Defs.DirNum[pce]; ++index)
+                    {
+                        dir = Defs.PceDir[pce][index];
+                        temp_sq = sq + dir;
+
+                        if (Defs.SQOFFBOARD(temp_sq) == Defs.Bool.TRUE)
+                        {
+                            continue;
+                        }
+
+                        if (board.pieces[temp_sq] != (int)Defs.Pieces.EMPTY)
+                        {
+                            if (PieceProperties.PieceCol[board.pieces[temp_sq]] != board.side)
+                            {
+                                AddCaptureMove(Move(sq, temp_sq, board.pieces[temp_sq], (int)Defs.Pieces.EMPTY, 0), board);
+                            }
+                        }
+                        
+                    }
+                }
+                pce = Defs.LoopNonSlidePce[pceIndex++];
+            }
+
+            // move gen logic for sliding pieces
+            pceIndex = Defs.LoopSlideIndex[(int)board.side];
+            pce = Defs.LoopSlidePce[pceIndex++];
+
+            while (pce != 0)
+            {
+                // visit all squares occupied by a parrticular piece
+                for (pceNum = 0; pceNum < board.pceNum[pce]; ++pceNum)
+                {
+                    sq = board.pList[Gameboard.PCEINDEX(pce, pceNum)];
+
+                    for (index = 0; index < Defs.DirNum[pce]; ++index)
+                    {
+                        dir = Defs.PceDir[pce][index];
+                        temp_sq = sq + dir;
+
+                        while (Defs.SQOFFBOARD(temp_sq) == Defs.Bool.FALSE)
+                        {
+                            if (board.pieces[temp_sq] != (int)Defs.Pieces.EMPTY)
+                            {
+                                if (PieceProperties.PieceCol[board.pieces[temp_sq]] != board.side)
+                                {
+                                    // add capture
+                                    AddCaptureMove(Move(sq, temp_sq, board.pieces[temp_sq], (int)Defs.Pieces.EMPTY, 0), board);
+                                }
+                                break;
+
+                            }
+                            temp_sq += dir;
+                        }
+                    }
+                }
+                pce = Defs.LoopSlidePce[pceIndex++];
+            }
+        }
+
         public string PrintMove(int move)
         {
             string MvStr;

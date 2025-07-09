@@ -474,8 +474,6 @@ namespace ChessEngineAPI.Engine
                     pList[PCEINDEX(piece, pceNum[piece])] = sq;
 
                     pceNum[piece]++;
-
-                    Console.WriteLine("piece: " + piece + " Square: " + sq);
                 }
 
             }

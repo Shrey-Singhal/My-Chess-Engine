@@ -1,4 +1,5 @@
 using System.Security.Cryptography.X509Certificates;
+using Microsoft.AspNetCore.Routing.Constraints;
 
 namespace ChessEngineAPI.Engine
 {
@@ -51,17 +52,105 @@ namespace ChessEngineAPI.Engine
             }
             return false;            
         }
+        //Quiescence is special extension of the normal search (alpha beta) that only explores noisy positions like captures, checks, and promotions after the normal search depth is reached.
+        public int Quiescense(int alpha, int beta)
+        {
+
+            if ((SearchController.Nodes & 2047) == 0)
+            {
+                CheckUp();
+            }
+
+            SearchController.Nodes++;
+
+            if ((IsRepitition() || board.fiftyMove >= 100) && board.ply != 0)
+            {
+                return 0;
+            }
+
+            if (board.ply > Defs.MAXDEPTH - 1)
+            {
+                return Evaluate.EvalPosition(board);
+            }
+
+            int Score = Evaluate.EvalPosition(board);
+            
+            //if score exceeds beta, prune. if it improves alpha, store it.
+            if (Score >= beta)
+            {
+                return beta;
+            }
+
+            if (Score > alpha)
+            {
+                alpha = Score;
+            }
+
+            movegen.GenerateCaptures(board);
+
+
+            int MoveNum = 0;
+            int Legal = 0; // counts legal moves (needed to detect checkmate/stalemate)
+            int OldAlpha = alpha;
+            int BestMove = MoveUtils.NO_MOVE;
+            int Move = MoveUtils.NO_MOVE;
+
+            // get PvMove
+            // order PvMove
+
+            //go through all moves generated for the current ply
+            for (MoveNum = board.moveListStart[board.ply]; MoveNum < board.moveListStart[board.ply + 1]; ++MoveNum)
+            {
+                // Pick the next move
+
+                Move = board.moveList[MoveNum];
+                //MakeMove returns false when the move is illegal- especially when the move puts or leaves king in check.
+                if (!moveManager.MakeMove(Move, board))
+                {
+                    continue;
+                }
+                Legal++; //icrement if the move is legal 
+                Score = -Quiescense(-beta, -alpha); //negamax trick
+
+                moveManager.TakeMove(); // this is to reset the board state to what it was at the root
+
+                if (SearchController.Stop)
+                {
+                    return 0;
+                }
+
+                if (Score > alpha)
+
+                    if (Score >= beta)
+                    {
+                        if (Legal == 1)
+                        {
+                            SearchController.Fhf++; //The first legal move caused the fail-high
+                        }
+                        SearchController.Fh++; //A fail high occurred.
+                        return beta;
+                    }
+
+                alpha = Score;
+                BestMove = Move;
+            }
+            if (alpha != OldAlpha)
+            {
+                PvTable.StorePvMove(board, BestMove);
+            }
+
+            return alpha;
+        }
 
         // alpha: the best score found so far for the maximizer (lower bound).
         // beta: the best score found so far for the minimizer (upper bound).
         // depth: how many plies (half-moves) deep we want to search.
         public int AlphaBeta(int alpha, int beta, int depth)
         {
-            SearchController.Nodes++;
             // base condition. once we've reached max depth, return an evaluation of the current position
             if (depth <= 0)
             {
-                return Evaluate.EvalPosition(board);
+                return Quiescense(alpha, beta);
 
             }
             // call check up every 2048 nodes.
@@ -69,6 +158,8 @@ namespace ChessEngineAPI.Engine
             {
                 CheckUp();
             }
+
+            SearchController.Nodes++;
 
             // this checks for 2 draw conditions:
             // isrepitition (if the current position has repeated) and if 50 fullmoves passed with no pawn move or capture
@@ -156,7 +247,7 @@ namespace ChessEngineAPI.Engine
 
             }
 
-            
+
 
             // check if the player has no legal moves left - could be checkmate or stalemate
 
@@ -241,7 +332,7 @@ namespace ChessEngineAPI.Engine
                 {
                     line += " " + movegen.PrintMove(board.PvArray[c]);
                 }
-                
+
                 Console.WriteLine(line);
             }
             
