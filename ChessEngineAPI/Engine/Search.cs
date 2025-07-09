@@ -15,9 +15,40 @@ namespace ChessEngineAPI.Engine
         public static int Best { get; set; } //best move found
         public static bool Thinking { get; set; } // flag to indicate if the engine is currently searching
     }
+    
+    
 
     public class Search(Gameboard board, Movegen movegen, MoveManager moveManager, PerfTesting perfTesting)
     {
+        // good move ordering = fewer nodes searched. AlphaBeta will cut off large portions of the tree
+        // If the best moves (e.g., captures, checks, killer moves) are searched first
+        public void PickNextMove(int MoveNum)
+        {
+            int index = 0;
+            int bestScore = -1;
+            int bestNum = MoveNum;
+
+            for (index = MoveNum; index < board.moveListStart[board.ply + 1]; ++index)
+            {
+                if (board.moveScores[index] > bestScore)
+                {
+                    bestScore = board.moveScores[index];
+                    bestNum = index;
+                }
+            }
+            //swap best scoring move into the current index so that it gets picked first during the next alphabeta call
+            if (bestNum != MoveNum)
+            {
+                int temp;
+                temp = board.moveScores[MoveNum];
+                board.moveScores[MoveNum] = board.moveScores[bestNum];
+                board.moveScores[bestNum] = temp;
+
+                temp = board.moveList[MoveNum];
+                board.moveList[MoveNum] = board.moveList[bestNum];
+                board.moveList[bestNum] = temp;
+            }
+        }
         //clear pvtable
         public void ClearPvTable()
         {
@@ -50,7 +81,7 @@ namespace ChessEngineAPI.Engine
                     return true;
                 }
             }
-            return false;            
+            return false;
         }
         //Quiescence is special extension of the normal search (alpha beta) that only explores noisy positions like captures, checks, and promotions after the normal search depth is reached.
         public int Quiescense(int alpha, int beta)
@@ -74,7 +105,7 @@ namespace ChessEngineAPI.Engine
             }
 
             int Score = Evaluate.EvalPosition(board);
-            
+
             //if score exceeds beta, prune. if it improves alpha, store it.
             if (Score >= beta)
             {
@@ -102,6 +133,7 @@ namespace ChessEngineAPI.Engine
             for (MoveNum = board.moveListStart[board.ply]; MoveNum < board.moveListStart[board.ply + 1]; ++MoveNum)
             {
                 // Pick the next move
+                PickNextMove(MoveNum);
 
                 Move = board.moveList[MoveNum];
                 //MakeMove returns false when the move is illegal- especially when the move puts or leaves king in check.
@@ -202,6 +234,7 @@ namespace ChessEngineAPI.Engine
             for (MoveNum = board.moveListStart[board.ply]; MoveNum < board.moveListStart[board.ply + 1]; ++MoveNum)
             {
                 // Pick the next move
+                PickNextMove(MoveNum);
 
                 Move = board.moveList[MoveNum];
                 //MakeMove returns false when the move is illegal- especially when the move puts or leaves king in check.
@@ -298,7 +331,7 @@ namespace ChessEngineAPI.Engine
             SearchController.Fhf = 0;
             SearchController.Start = DateTime.Now;
             SearchController.Stop = false;
-        } 
+        }
 
 
         public void SearchPosition()
@@ -335,7 +368,7 @@ namespace ChessEngineAPI.Engine
 
                 Console.WriteLine(line);
             }
-            
+
 
             SearchController.Best = bestMove;
             SearchController.Thinking = false;
