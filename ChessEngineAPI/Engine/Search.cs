@@ -18,7 +18,7 @@ namespace ChessEngineAPI.Engine
     
     
 
-    public class Search(Gameboard board, Movegen movegen, MoveManager moveManager, PerfTesting perfTesting)
+    public class Search(Gameboard board, Movegen movegen, MoveManager moveManager)
     {
         // good move ordering = fewer nodes searched. AlphaBeta will cut off large portions of the tree
         // If the best moves (e.g., captures, checks, killer moves) are searched first
@@ -120,7 +120,7 @@ namespace ChessEngineAPI.Engine
             movegen.GenerateCaptures(board);
 
 
-            int MoveNum = 0;
+            int MoveNum;
             int Legal = 0; // counts legal moves (needed to detect checkmate/stalemate)
             int OldAlpha = alpha;
             int BestMove = MoveUtils.NO_MOVE;
@@ -221,7 +221,7 @@ namespace ChessEngineAPI.Engine
             movegen.GenerateMoves(board);
 
 
-            int MoveNum = 0;
+            int MoveNum;
             int Legal = 0; // counts legal moves (needed to detect checkmate/stalemate)
             int OldAlpha = alpha;
             int BestMove = MoveUtils.NO_MOVE;
@@ -359,13 +359,17 @@ namespace ChessEngineAPI.Engine
                             + " nodes: " + SearchController.Nodes;
 
                 pvNum = PvTable.GetPvLine(board, currentDepth, movegen, moveManager);
-                line += "Pv:";
+                line += " Pv:";
 
                 for (int c = 0; c < pvNum; ++c)
                 {
                     line += " " + movegen.PrintMove(board.PvArray[c]);
                 }
 
+                if (currentDepth != 1)
+                {
+                    line += " Ordering: " + Math.Round((double)SearchController.Fhf / SearchController.Fh * 100, 2) + "%";
+                }
                 Console.WriteLine(line);
             }
 

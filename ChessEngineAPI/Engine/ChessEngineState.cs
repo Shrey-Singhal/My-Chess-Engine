@@ -15,7 +15,7 @@ namespace ChessEngineAPI.Engine
             movegen = new();
             moveManager = new(Board);
             perfTesting = new(Board);
-            search = new(Board, movegen, moveManager, perfTesting);
+            search = new(Board, movegen, moveManager);
 
             Defs.InitFilesRanksBoard();
             Board.InitHashKeys(); // set up random hash keys            
@@ -40,6 +40,7 @@ namespace ChessEngineAPI.Engine
                     posKey = 0
                 };
             }
+            movegen.InitMvvLva();
 
 
 

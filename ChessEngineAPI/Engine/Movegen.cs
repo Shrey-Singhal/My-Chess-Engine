@@ -2,6 +2,31 @@ namespace ChessEngineAPI.Engine
 {
     public class Movegen
     {
+        //index: 0 = empty, 1 = pawn(100), 2 = knight(200), 3 = biship(300), 4 = rook(400), 5 = queen(500), 6 = king(600), 7-12 are black pces w same val
+        public int[] MvvLvaValue = [0, 100, 200, 300, 400, 500, 600, 100, 200, 300, 400, 500, 600];
+        //this array will store a score for each attacker-victim pair
+        //There are 14 possible piece types (including EMPTY and unused slot for indexing safely), so total = 14×14 = 196 slots.
+        public int[] MvvLvaScores = new int[14 * 14];
+
+        // MVV-LVA is a strategy where:
+        // Victim: You prefer to capture the most valuable piece (e.g., Queen).
+        // Attacker: You prefer to use the least valuable piece (e.g., Pawn).
+        // So, capturing a Queen with a Pawn is ranked higher than capturing a Bishop with a Rook.
+        public void InitMvvLva()
+        {
+            int Attacker;
+            int Victim;
+
+            for (Attacker = (int)Defs.Pieces.wP; Attacker <= (int)Defs.Pieces.bK; ++Attacker)
+            {
+                for (Victim = (int)Defs.Pieces.wP; Victim <= (int)Defs.Pieces.bK; ++Victim)
+                {
+                    //compute a score for attacker-vcitim pair
+                    MvvLvaScores[Victim * 14 + Attacker] = MvvLvaValue[Victim] + 6 - (MvvLvaValue[Attacker] / 100);
+                }
+            }
+        }
+
         public static int Move(int from, int to, int captured, int promoted, int flag)
         {
             return from | (to << 7) | (captured << 14) | (promoted << 20) | flag;
@@ -12,7 +37,8 @@ namespace ChessEngineAPI.Engine
             // store the move
             board.moveList[board.moveListStart[board.ply + 1]] = move;
             // not scoring the moves yet.
-            board.moveScores[board.moveListStart[board.ply + 1]++] = 0;
+            board.moveScores[board.moveListStart[board.ply + 1]++] =
+                MvvLvaScores[MoveUtils.CapturedPiece(move) * 14 + board.pieces[MoveUtils.FromSquare(move)]] + 1000000;
         }
 
         public void AddQuietMove(int move, Gameboard board)
@@ -28,7 +54,7 @@ namespace ChessEngineAPI.Engine
             // store the move
             board.moveList[board.moveListStart[board.ply + 1]] = move;
             // not scoring the moves yet.
-            board.moveScores[board.moveListStart[board.ply + 1]++] = 0;
+            board.moveScores[board.moveListStart[board.ply + 1]++] = 105 + 1000000;
         }
 
         public void AddWhitePawnCaptureMove(int from, int to, int cap, Gameboard board)
