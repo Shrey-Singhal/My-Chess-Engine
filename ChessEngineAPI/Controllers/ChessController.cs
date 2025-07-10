@@ -28,5 +28,12 @@ namespace ChessEngineAPI.Controllers
             return Ok(new { message = "Fen received and applied", fen = request.Fen });
         }
 
+        [HttpGet("getpieces")]
+        public IActionResult GetPieces()
+        {
+            var pieces = _engine.GetGuiPieces();
+            return Ok(pieces);
+        }
+
     }
 }
