@@ -216,7 +216,7 @@ namespace ChessEngineAPI.Engine
             {
                 if (board.side == (int)Defs.Colours.WHITE)
                 {
-                    AddPiece(to - 10, (int)Defs.Pieces.bp, board);
+                    AddPiece(to - 10, (int)Defs.Pieces.bP, board);
                 }
                 else
                 {
@@ -261,7 +261,7 @@ namespace ChessEngineAPI.Engine
                     AddPiece(from, (int)Defs.Pieces.wP, board);
                 }
                 else {
-                    AddPiece(from, (int)Defs.Pieces.bp, board);
+                    AddPiece(from, (int)Defs.Pieces.bP, board);
                 }
             }
 
