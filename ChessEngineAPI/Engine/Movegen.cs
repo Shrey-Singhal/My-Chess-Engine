@@ -229,7 +229,7 @@ namespace ChessEngineAPI.Engine
             }
             else
             {
-                pceType = (int)Defs.Pieces.bp;
+                pceType = (int)Defs.Pieces.bP;
 
                 for (pceNum = 0; pceNum < board.pceNum[pceType]; ++pceNum)
                 {
@@ -416,7 +416,7 @@ namespace ChessEngineAPI.Engine
             }
             else
             {
-                pceType = (int)Defs.Pieces.bp;
+                pceType = (int)Defs.Pieces.bP;
 
                 for (pceNum = 0; pceNum < board.pceNum[pceType]; ++pceNum)
                 {

@@ -65,7 +65,7 @@ namespace ChessEngineAPI.Engine
                 score += PawnTable[Defs.SQ64(sq)];
             }
 
-            pce = (int)Defs.Pieces.bp;
+            pce = (int)Defs.Pieces.bP;
             for (pceNum = 0; pceNum < board.pceNum[pce]; ++pceNum)
             {
                 sq = board.pList[Gameboard.PCEINDEX(pce, pceNum)];

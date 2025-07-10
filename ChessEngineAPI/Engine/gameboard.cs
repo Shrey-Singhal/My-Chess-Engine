@@ -236,7 +236,7 @@ namespace ChessEngineAPI.Engine
 
                 switch (fen[fenCnt])
                 {
-                    case 'p': piece = (int)Defs.Pieces.bp; break;
+                    case 'p': piece = (int)Defs.Pieces.bP; break;
                     case 'r': piece = (int)Defs.Pieces.bR; break;
                     case 'n': piece = (int)Defs.Pieces.bN; break;
                     case 'b': piece = (int)Defs.Pieces.bB; break;
@@ -494,7 +494,7 @@ namespace ChessEngineAPI.Engine
             }
             else
             {
-                if (pieces[sq + 11] == (int)Defs.Pieces.bp || pieces[sq + 9] == (int)Defs.Pieces.bp)
+                if (pieces[sq + 11] == (int)Defs.Pieces.bP || pieces[sq + 9] == (int)Defs.Pieces.bP)
                 {
                     return Defs.Bool.TRUE;
                 }
