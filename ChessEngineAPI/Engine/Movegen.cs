@@ -36,7 +36,6 @@ namespace ChessEngineAPI.Engine
         {
             // store the move
             board.moveList[board.moveListStart[board.ply + 1]] = move;
-            // not scoring the moves yet.
             board.moveScores[board.moveListStart[board.ply + 1]++] =
                 MvvLvaScores[MoveUtils.CapturedPiece(move) * 14 + board.pieces[MoveUtils.FromSquare(move)]] + 1000000;
         }
@@ -45,15 +44,29 @@ namespace ChessEngineAPI.Engine
         {
             // store the move
             board.moveList[board.moveListStart[board.ply + 1]] = move;
-            // not scoring the moves yet.
-            board.moveScores[board.moveListStart[board.ply + 1]++] = 0;
+            board.moveScores[board.moveListStart[board.ply + 1]] = 0;
+
+            if (move == board.searchKillers[board.ply])
+            {
+                board.moveScores[board.moveListStart[board.ply + 1]] = 900000;
+            }
+            else if (move == board.searchKillers[board.ply + Defs.MAXDEPTH])
+            {
+                board.moveScores[board.moveListStart[board.ply + 1]] = 800000;
+            }
+            else
+            {
+                board.moveScores[board.moveListStart[board.ply + 1]] =
+                    board.searchHistory[board.pieces[MoveUtils.FromSquare(move)] * Defs.BRD_SQ_NUM + MoveUtils.ToSquare(move)];
+            }
+
+            board.moveListStart[board.ply + 1]++;
         }
 
         public void AddEnPassantMove(int move, Gameboard board)
         {
             // store the move
             board.moveList[board.moveListStart[board.ply + 1]] = move;
-            // not scoring the moves yet.
             board.moveScores[board.moveListStart[board.ply + 1]++] = 105 + 1000000;
         }
 

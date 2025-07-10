@@ -124,7 +124,7 @@ namespace ChessEngineAPI.Engine
             int Legal = 0; // counts legal moves (needed to detect checkmate/stalemate)
             int OldAlpha = alpha;
             int BestMove = MoveUtils.NO_MOVE;
-            int Move = MoveUtils.NO_MOVE;
+            int Move;
 
             // get PvMove
             // order PvMove
@@ -152,7 +152,7 @@ namespace ChessEngineAPI.Engine
                 }
 
                 if (Score > alpha)
-
+                {
                     if (Score >= beta)
                     {
                         if (Legal == 1)
@@ -163,8 +163,10 @@ namespace ChessEngineAPI.Engine
                         return beta;
                     }
 
-                alpha = Score;
-                BestMove = Move;
+                    alpha = Score;
+                    BestMove = Move;
+                }
+                    
             }
             if (alpha != OldAlpha)
             {
@@ -225,7 +227,20 @@ namespace ChessEngineAPI.Engine
             int Legal = 0; // counts legal moves (needed to detect checkmate/stalemate)
             int OldAlpha = alpha;
             int BestMove = MoveUtils.NO_MOVE;
-            int Move = MoveUtils.NO_MOVE;
+            int Move;
+            int PvMove = PvTable.ProbePvTable(board);
+            
+            if (PvMove != MoveUtils.NO_MOVE)
+            {
+                for (MoveNum = board.moveListStart[board.ply]; MoveNum < board.moveListStart[board.ply + 1]; ++MoveNum)
+                {
+                    if (board.moveList[MoveNum] == PvMove)
+                    {
+                        board.moveScores[MoveNum] = 2000000;
+                        break;
+                    }
+                }
+            }
 
             // get PvMove
             // order PvMove
@@ -268,10 +283,18 @@ namespace ChessEngineAPI.Engine
                         SearchController.Fh++; //A fail high occurred.
 
                         // Update Killer Moves
-
+                        if ((Move & MoveUtils.MFLAG_CAPTURE) == 0)
+                        {
+                            board.searchKillers[Defs.MAXDEPTH + board.ply] = board.searchKillers[board.ply];
+                            board.searchKillers[board.ply] = Move;
+                        }
                         return beta;
                     }
-
+                    if ((Move & MoveUtils.MFLAG_CAPTURE) == 0)
+                    {
+                        board.searchHistory[board.pieces[MoveUtils.FromSquare(Move)] * Defs.BRD_SQ_NUM + MoveUtils.ToSquare(Move)]
+                                += depth * depth;
+                    }
                     alpha = Score;
                     BestMove = Move;
 
@@ -346,7 +369,7 @@ namespace ChessEngineAPI.Engine
             SearchController.Time = 10000; // 10 seconds
 
             // starts a loop for iterative deepening search
-            for (currentDepth = 1; currentDepth <= /*SearchController.Depth */ 5; ++currentDepth)
+            for (currentDepth = 1; currentDepth <= /*SearchController.Depth */ 6; ++currentDepth)
             {
                 bestScore = AlphaBeta(-Defs.INFINITE, Defs.INFINITE, currentDepth);
                 if (SearchController.Stop) //breaks early if search us inturrupted
