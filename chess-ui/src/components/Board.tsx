@@ -1,4 +1,4 @@
-import React, { type JSX } from "react";
+import React, { useRef, useState, type JSX } from "react";
 
 type GuiPiece = {
     fileClass: string;
@@ -9,6 +9,10 @@ type GuiPiece = {
 function Board({pieces}: {pieces: GuiPiece[]}) {
     //const [pieces, setPieces] = useState<GuiPiece[]>([]);
     const squares_style = "absolute w-[60px] h-[60px]";
+    const [selectedSquare, setSelectedSquare] = useState<{ file: number; rank: number } | null>(null);
+
+    const boardRef = useRef<HTMLDivElement>(null);
+
 
     //render squares
     const generateBoardSquares = (): JSX.Element[] => {
@@ -24,11 +28,15 @@ function Board({pieces}: {pieces: GuiPiece[]}) {
                 const colorClass = light === 0 ? "Light" : "Dark";
                 light ^= 1;
 
-                const combinedClass = `${squares_style} ${rankClass} ${fileClass} ${colorClass}`;
+                const isSelected = selectedSquare?.file === file && selectedSquare?.rank === rank;
+                const selectedClass = isSelected ? "SqSelected" : "";
+
+                const combinedClass = `${squares_style} ${rankClass} ${fileClass} ${colorClass} ${selectedClass}`;
                 squares.push(
                     <div
                         key={`${rankClass}-${fileClass}`}
                         className={combinedClass}
+                        onClick={(e) => handleClick(e, "Square")}
                     ></div>
                 );
             }
@@ -37,8 +45,34 @@ function Board({pieces}: {pieces: GuiPiece[]}) {
         return squares;
     }
 
+    const handleClick = (e: React.MouseEvent, type: "Piece" | "Square") => {
+        console.log(`${type} Click`);
+        console.log(`ClickedSquare() at ${e.pageX}, ${e.pageY}`);
+        const position = boardRef.current?.getBoundingClientRect();
+        if (!position) return;
+        
+        const workedX = Math.floor(position.left);
+        const workedY = Math.floor(position.top);
+
+        const pageX = Math.floor(e.pageX);
+        const pageY = Math.floor(e.pageY);
+        
+        const file = Math.floor((pageX - workedX) / 60);
+        const rank = 7 - Math.floor((pageY - workedY) / 60);
+        
+        // Call backend to convert file/rank to 120-based square index
+        fetch(`http://localhost:5045/api/chess/fr2sq?file=${file}&rank=${rank}`)
+            .then(res => res.json())
+            .then(data => {
+                console.log("Clicked sq:", data.prSq);
+            })
+            .catch(err => console.error("Error fetching square:", err));
+        
+            setSelectedSquare({file, rank});
+    }
+
     return (
-        <div className="relative top-5 left-14 w-[480px] h-[480px]">
+        <div className="relative top-5 left-14 w-[480px] h-[480px]" ref={boardRef} id = "Board">
             {generateBoardSquares()}
             {pieces.map((p, i) => {
                 const rankClass = p.rankClass;
@@ -50,6 +84,7 @@ function Board({pieces}: {pieces: GuiPiece[]}) {
                     src={imgSrc}
                     className={`Piece ${rankClass} ${fileClass} absolute w-[60px] h-[60px]`}
                     alt={p.imagePath}
+                    onClick={(e) => handleClick(e, "Piece")}
                 />
                 );
             })}

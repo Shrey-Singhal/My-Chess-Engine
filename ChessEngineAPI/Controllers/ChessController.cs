@@ -6,14 +6,10 @@ namespace ChessEngineAPI.Controllers
 {
     [ApiController]
     [Route("api/chess")]
-    public class ChessController : ControllerBase
+    public class ChessController(ChessEngineState engine) : ControllerBase
     {
-        private readonly ChessEngineState _engine;
+        private readonly ChessEngineState _engine = engine;
 
-        public ChessController(ChessEngineState engine)
-        {
-            _engine = engine;
-        }
         [HttpPost("setfen")]
         // [FromBody] FenRequest requestgets the json body from request and converts it to FenRequest object
         public IActionResult SetFEN([FromBody] FenRequest request)
@@ -33,6 +29,14 @@ namespace ChessEngineAPI.Controllers
         {
             var pieces = _engine.GetGuiPieces();
             return Ok(pieces);
+        }
+
+        [HttpGet("fr2sq")]
+        public IActionResult FileRankToSq(int file, int rank)
+        {
+            int sq = Defs.GetSquareIndex(file, rank); // returns 0–119
+            string prSq = Defs.FileChar[Defs.FilesBrd[sq]] + Defs.RankChar[Defs.RanksBrd[sq]].ToString(); // convert to "e4", "d5", etc.
+            return Ok(new { prSq, sq });
         }
 
     }

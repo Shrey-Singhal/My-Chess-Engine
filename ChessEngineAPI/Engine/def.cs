@@ -221,10 +221,22 @@ namespace ChessEngineAPI.Engine
             8   ,   9   ,   10  ,   11  ,   12  ,   13  ,   14  ,   15  ,
             0   ,   1   ,   2   ,   3   ,   4   ,   5   ,   6   ,   7
         ];
-        
-        public static int MIRROR64(int sq) {
+
+        public static int MIRROR64(int sq)
+        {
             return Mirror64[sq];
         }
+        
+        public class UserMove
+        {
+            public int From { get; set; }
+            public int To { get; set; }
 
+            public UserMove()
+            {
+                From = Squares.NO_SQ;
+                To = Squares.NO_SQ;
+            }
+        }
     }
 }
