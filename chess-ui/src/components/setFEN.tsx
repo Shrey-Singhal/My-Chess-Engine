@@ -1,6 +1,6 @@
 import { useState } from "react";
 
-export default function SetFEN() {
+const SetFEN = ({fetchPieces}: {fetchPieces: () => void}) => {
     const [fen, setFen] = useState("");
 
     const sendFEN = async () => {
@@ -11,6 +11,8 @@ export default function SetFEN() {
         });
         const data = await res.json();
         console.log("Backend response:", data);
+
+		fetchPieces();
     };
 
     return (
@@ -31,3 +33,5 @@ export default function SetFEN() {
         </div>
     );
 }
+
+export default SetFEN;

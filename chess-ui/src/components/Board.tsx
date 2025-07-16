@@ -1,4 +1,4 @@
-import React, { useEffect, useState, type JSX } from "react";
+import React, { type JSX } from "react";
 
 type GuiPiece = {
     fileClass: string;
@@ -6,8 +6,8 @@ type GuiPiece = {
     imagePath: string;
 }
 
-function Board() {
-    const [pieces, setPieces] = useState<GuiPiece[]>([]);
+function Board({pieces}: {pieces: GuiPiece[]}) {
+    //const [pieces, setPieces] = useState<GuiPiece[]>([]);
     const squares_style = "absolute w-[60px] h-[60px]";
 
     //render squares
@@ -36,17 +36,6 @@ function Board() {
 
         return squares;
     }
-
-    // Fetch pieces on mount
-    useEffect(() => {
-        fetch("http://localhost:5045/api/chess/getpieces")
-        .then((res) => res.json())
-        .then((data: GuiPiece[]) => {
-            setPieces(data);
-        })
-        .catch((err) => console.error("Failed to fetch pieces:", err));
-    }, []);
-
 
     return (
         <div className="relative top-5 left-14 w-[480px] h-[480px]">
