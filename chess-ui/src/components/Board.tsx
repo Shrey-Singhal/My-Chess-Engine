@@ -4,15 +4,17 @@ type GuiPiece = {
     fileClass: string;
     rankClass: string;
     imagePath: string;
-}
+};
 
-function Board({pieces}: {pieces: GuiPiece[]}) {
+function Board({ pieces }: { pieces: GuiPiece[] }) {
     //const [pieces, setPieces] = useState<GuiPiece[]>([]);
     const squares_style = "absolute w-[60px] h-[60px]";
-    const [selectedSquare, setSelectedSquare] = useState<{ file: number; rank: number } | null>(null);
-
+    const [selectedSquares, setSelectedSquares] = useState<{
+        from: { file: number; rank: number } | null;
+        to: { file: number; rank: number } | null;
+    }>({ from: null, to: null });
+    
     const boardRef = useRef<HTMLDivElement>(null);
-
 
     //render squares
     const generateBoardSquares = (): JSX.Element[] => {
@@ -21,14 +23,17 @@ function Board({pieces}: {pieces: GuiPiece[]}) {
 
         for (let rank = 7; rank >= 0; rank--) {
             light ^= 1;
-            const rankClass = `rank${rank+1}`;
+            const rankClass = `rank${rank + 1}`;
 
             for (let file = 0; file <= 7; file++) {
-                const fileClass = `file${file+1}`;
+                const fileClass = `file${file + 1}`;
                 const colorClass = light === 0 ? "Light" : "Dark";
                 light ^= 1;
 
-                const isSelected = selectedSquare?.file === file && selectedSquare?.rank === rank;
+                const isSelected =
+                    (selectedSquares.from?.file === file && selectedSquares.from?.rank === rank) ||
+                    (selectedSquares.to?.file === file && selectedSquares.to?.rank === rank);
+
                 const selectedClass = isSelected ? "SqSelected" : "";
 
                 const combinedClass = `${squares_style} ${rankClass} ${fileClass} ${colorClass} ${selectedClass}`;
@@ -43,49 +48,120 @@ function Board({pieces}: {pieces: GuiPiece[]}) {
         }
 
         return squares;
-    }
+    };
 
     const handleClick = (e: React.MouseEvent, type: "Piece" | "Square") => {
-        console.log(`${type} Click`);
-        console.log(`ClickedSquare() at ${e.pageX}, ${e.pageY}`);
         const position = boardRef.current?.getBoundingClientRect();
         if (!position) return;
-        
+
         const workedX = Math.floor(position.left);
         const workedY = Math.floor(position.top);
 
         const pageX = Math.floor(e.pageX);
         const pageY = Math.floor(e.pageY);
-        
+
         const file = Math.floor((pageX - workedX) / 60);
         const rank = 7 - Math.floor((pageY - workedY) / 60);
-        
-        // Call backend to convert file/rank to 120-based square index
+
+        // Call backend to convert file/rank to 120-based square index & printable square
         fetch(`http://localhost:5045/api/chess/fr2sq?file=${file}&rank=${rank}`)
-            .then(res => res.json())
-            .then(data => {
-                console.log("Clicked sq:", data.prSq);
+            .then((res) => res.json())
+            .then((data) => {
+                const newSq = data.sq;
+                const prSq = data.prSq; // Algebraic (like "e4", "d5")
+
+                // Print the selected square every time
+                console.log(`Selected square: ${prSq} (${file}, ${rank})`);
+
+                // PIECE CLICK
+                if (type === "Piece") {
+                    if (!selectedSquares.from) {
+                        // First piece click: set from
+                        setSelectedSquares({ from: { file, rank }, to: null });
+
+                        // Tell backend: set from
+                        fetch("http://localhost:5045/api/chess/setusermove", {
+                            method: "POST",
+                            headers: { "Content-Type": "application/json" },
+                            body: JSON.stringify(newSq),
+                        }).then(() => {
+                            console.log(`From square set to ${prSq}`);
+                        });
+                    } else {
+                        // Second piece click: set to
+                        setSelectedSquares({ from: selectedSquares.from, to: { file, rank } });
+
+                        // Tell backend: set to
+                        fetch("http://localhost:5045/api/chess/setusermove", {
+                            method: "POST",
+                            headers: { "Content-Type": "application/json" },
+                            body: JSON.stringify(newSq),
+                        })
+                        .then((res) => res.json())
+                        .then((moveData) => {
+                            // Optionally print move as algebraic: get fromSq and toSq from backend if available
+                            if (moveData.fromSq && moveData.toSq) {
+                                console.log(`Move made: ${moveData.fromSq} -> ${moveData.toSq}`);
+                            } else {
+                                // fallback to local
+                                console.log(`Move made: ${prSq} (to)`);
+                            }
+                            // Reset UI and backend
+                            fetch("http://localhost:5045/api/chess/resetusermove", { method: "POST" })
+                            .then(() => setSelectedSquares({ from: null, to: null }));
+                        });
+                    }
+                }
+
+                // SQUARE CLICK
+                if (type === "Square") {
+                    if (selectedSquares.from) {
+                        setSelectedSquares({
+                            from: selectedSquares.from,
+                            to: { file, rank },
+                        });
+
+                        fetch("http://localhost:5045/api/chess/setusermove", {
+                            method: "POST",
+                            headers: { "Content-Type": "application/json" },
+                            body: JSON.stringify(newSq),
+                        })
+                        .then((res) => res.json())
+                        .then((moveData) => {
+                            if (moveData.fromSq && moveData.toSq) {
+                                console.log(`Move made: ${moveData.fromSq} -> ${moveData.toSq}`);
+                            } else {
+                                console.log(`Move made to: ${prSq}`);
+                            }
+                            fetch("http://localhost:5045/api/chess/resetusermove", { method: "POST" })
+                            .then(() => setSelectedSquares({ from: null, to: null }));
+                        });
+                    }
+                }
             })
-            .catch(err => console.error("Error fetching square:", err));
-        
-            setSelectedSquare({file, rank});
-    }
+            .catch((err) => console.error("Error fetching square:", err));
+    };
+
 
     return (
-        <div className="relative top-5 left-14 w-[480px] h-[480px]" ref={boardRef} id = "Board">
+        <div
+            className="relative top-5 left-14 w-[480px] h-[480px]"
+            ref={boardRef}
+            id="Board"
+        >
             {generateBoardSquares()}
             {pieces.map((p, i) => {
                 const rankClass = p.rankClass;
                 const fileClass = p.fileClass;
                 const imgSrc = `/images/${p.imagePath}`;
                 return (
-                <img
-                    key={i}
-                    src={imgSrc}
-                    className={`Piece ${rankClass} ${fileClass} absolute w-[60px] h-[60px]`}
-                    alt={p.imagePath}
-                    onClick={(e) => handleClick(e, "Piece")}
-                />
+                    <img
+                        key={i}
+                        src={imgSrc}
+                        className={`Piece ${rankClass} ${fileClass} absolute w-[60px] h-[60px]`}
+                        alt={p.imagePath}
+                        onClick={(e) => handleClick(e, "Piece")}
+                    />
                 );
             })}
         </div>

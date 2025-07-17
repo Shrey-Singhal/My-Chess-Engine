@@ -226,17 +226,21 @@ namespace ChessEngineAPI.Engine
         {
             return Mirror64[sq];
         }
-        
-        public class UserMove
-        {
-            public int From { get; set; }
-            public int To { get; set; }
 
-            public UserMove()
-            {
-                From = Squares.NO_SQ;
-                To = Squares.NO_SQ;
-            }
+        public static class UserMove
+        {
+#pragma warning disable CA2211 // Non-constant fields should not be visible
+            public static int from = Squares.NO_SQ;
+#pragma warning restore CA2211 // Non-constant fields should not be visible
+#pragma warning disable CA2211 // Non-constant fields should not be visible
+            public static int to = Squares.NO_SQ;
+#pragma warning restore CA2211 // Non-constant fields should not be visible
+
+        }
+
+        public static string SqToPrSq(int sq)
+        {
+            return FileChar[FilesBrd[sq]] + RankChar[RanksBrd[sq]].ToString();
         }
     }
 }

@@ -39,5 +39,53 @@ namespace ChessEngineAPI.Controllers
             return Ok(new { prSq, sq });
         }
 
+        [HttpPost("setusermove")]
+        public IActionResult SetUserMove([FromBody] int sq)
+        {
+            if (Defs.UserMove.from == Defs.Squares.NO_SQ)
+            {
+                Defs.UserMove.from = sq;
+                return Ok(new
+                {
+                    message = "from set",
+                    fromSq = Defs.SqToPrSq(Defs.UserMove.from)
+                });
+            }
+            else
+            {
+                Defs.UserMove.to = sq;
+
+                var fromPrSq = Defs.SqToPrSq(Defs.UserMove.from);
+                var toPrSq = Defs.SqToPrSq(Defs.UserMove.to);
+
+                return Ok(new
+                {
+                    message = "move completed",
+                    fromSq = fromPrSq,
+                    toSq = toPrSq
+                });
+            }
+        }
+
+        [HttpGet("getusermove")]
+        public IActionResult GetUserMove()
+        {
+            return Ok(new
+            {
+                from = Defs.UserMove.from,
+                to = Defs.UserMove.to,
+                fromSq = Defs.UserMove.from == Defs.Squares.NO_SQ ? null : Defs.SqToPrSq(Defs.UserMove.from),
+                toSq = Defs.UserMove.to == Defs.Squares.NO_SQ ? null : Defs.SqToPrSq(Defs.UserMove.to)
+            });
+        }
+
+        [HttpPost("resetusermove")]
+        public IActionResult ResetUserMove()
+        {
+            Defs.UserMove.from = Defs.Squares.NO_SQ;
+            Defs.UserMove.to = Defs.Squares.NO_SQ;
+
+            return Ok("user move reset");
+        }
     }
 }
