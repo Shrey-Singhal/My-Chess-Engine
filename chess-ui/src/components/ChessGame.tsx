@@ -27,7 +27,7 @@ const ChessGame = () => {
     return (
         <>
             <SetFen fetchPieces={fetchPieces} />
-            <Board pieces={pieces} />
+            <Board pieces={pieces} fetchPieces={fetchPieces} />
         </>
     );
 }

@@ -6,7 +6,12 @@ type GuiPiece = {
     imagePath: string;
 };
 
-function Board({ pieces }: { pieces: GuiPiece[] }) {
+type BoardProps = {
+    pieces: GuiPiece[];
+    fetchPieces: () => void;
+}
+
+function Board({ pieces, fetchPieces }: BoardProps) {
     //const [pieces, setPieces] = useState<GuiPiece[]>([]);
     const squares_style = "absolute w-[60px] h-[60px]";
     const [selectedSquares, setSelectedSquares] = useState<{
@@ -108,6 +113,9 @@ function Board({ pieces }: { pieces: GuiPiece[] }) {
                                 await fetch("http://localhost:5045/api/chess/resetusermove", { method: "POST" }); // reset backend
                                 return null;
                             }
+                            else {
+                                fetchPieces();
+                            }
                             return res.json();
                         })                        
                         
@@ -152,6 +160,9 @@ function Board({ pieces }: { pieces: GuiPiece[] }) {
                                 setSelectedSquares({from: null, to: null});
                                 await fetch("http://localhost:5045/api/chess/resetusermove", { method: "POST" }); // reset backend
                                 return null;
+                            }
+                            else {
+                                fetchPieces();
                             }
                             return res.json();
                         })
