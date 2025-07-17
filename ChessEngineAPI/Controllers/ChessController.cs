@@ -87,5 +87,27 @@ namespace ChessEngineAPI.Controllers
 
             return Ok("user move reset");
         }
+
+        [HttpPost("makeusermove")]
+        public IActionResult MakeUserMove()
+        {
+            if (Defs.UserMove.from != Defs.Squares.NO_SQ && Defs.UserMove.to != Defs.Squares.NO_SQ)
+            {
+                // Parse the move (using your ParseMove logic)
+                int parsed = _engine.Movegen.ParseMove(Defs.UserMove.from, Defs.UserMove.to, _engine.Board, _engine.MoveManager);
+                if (parsed != MoveUtils.NO_MOVE)
+                {
+                    _engine.MoveManager.MakeMove(parsed, _engine.Board); // actually make the move
+                    _engine.Board.PrintBoard();
+                    return Ok(new {
+                        message = "Move made",
+                        fromSq = Defs.SqToPrSq(Defs.UserMove.from),
+                        toSq = Defs.SqToPrSq(Defs.UserMove.to)
+                    });
+                }
+                return BadRequest("Illegal move");
+            }
+            return BadRequest("Both 'from' and 'to' must be set");
+        }
     }
 }

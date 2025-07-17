@@ -447,7 +447,7 @@ namespace ChessEngineAPI.Engine
                             AddEnPassantMove(Move(sq, sq - 11, (int)Defs.Pieces.EMPTY, (int)Defs.Pieces.EMPTY, MoveUtils.MFLAG_EN_PASSANT), board);
                         }
                     }
-                }                
+                }
             }
             // move gen logic for non sliding pieces
             pceIndex = Defs.LoopNonSlideIndex[(int)board.side];
@@ -477,7 +477,7 @@ namespace ChessEngineAPI.Engine
                                 AddCaptureMove(Move(sq, temp_sq, board.pieces[temp_sq], (int)Defs.Pieces.EMPTY, 0), board);
                             }
                         }
-                        
+
                     }
                 }
                 pce = Defs.LoopNonSlidePce[pceIndex++];
@@ -583,6 +583,57 @@ namespace ChessEngineAPI.Engine
                 }
             }
             return false;
+        }
+        // this function searches for a legal move on the board that starts at from square and ends at to square.
+        // if it finds a move then it returns the move, otherwise it returns a NO_MOVE
+        public int ParseMove(int from, int to, Gameboard board, MoveManager moveManager)
+        {
+            // Generate all possible moves for the current position and ply
+            GenerateMoves(board);
+
+            int move = MoveUtils.NO_MOVE;
+            int promPce;
+            bool found = false;
+
+            // Loop over all moves in the move list for this ply
+            for (int index = board.moveListStart[board.ply];
+                index < board.moveListStart[board.ply + 1];
+                ++index)
+            {
+                move = board.moveList[index];
+
+                if (MoveUtils.FromSquare(move) == from && MoveUtils.ToSquare(move) == to)
+                {
+                    promPce = MoveUtils.PromotedPiece(move);
+
+                    // If this is a promotion, only pick if promoting to a queen of correct colour
+                    if (promPce != (int)Defs.Pieces.EMPTY)
+                    {
+                        if ((promPce == (int)Defs.Pieces.wQ && board.side == Defs.Colours.WHITE) ||
+                            (promPce == (int)Defs.Pieces.bQ && board.side == Defs.Colours.BLACK))
+                        {
+                            found = true;
+                            break;
+                        }
+                        continue; // if it's a promotion, but not to a queen, skip this move
+                    }
+                    found = true;
+                    break;
+                }
+            }
+
+            if (found)
+            {
+                // Try to make the move and verify it is legal
+                if (!moveManager.MakeMove(move, board))
+                {
+                    return MoveUtils.NO_MOVE;
+                }
+                moveManager.TakeMove(); // revert to original state (just checking if move is legal)
+                return move;
+            }
+
+            return MoveUtils.NO_MOVE;
         }
     }
 }

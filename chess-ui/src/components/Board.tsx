@@ -97,18 +97,34 @@ function Board({ pieces }: { pieces: GuiPiece[] }) {
                             headers: { "Content-Type": "application/json" },
                             body: JSON.stringify(newSq),
                         })
-                        .then((res) => res.json())
+                        .then(() =>
+                            // Now call makemove after both from and to are set
+                            fetch("http://localhost:5045/api/chess/makeusermove", { method: "POST" })
+                        )
+                        .then(async (res) => {
+                            if (!res.ok) {
+                                //move was invalid
+                                setSelectedSquares({from: null, to: null});
+                                await fetch("http://localhost:5045/api/chess/resetusermove", { method: "POST" }); // reset backend
+                                return null;
+                            }
+                            return res.json();
+                        })                        
+                        
                         .then((moveData) => {
-                            // Optionally print move as algebraic: get fromSq and toSq from backend if available
+                            if (!moveData) return;
+                            // Print move as algebraic: get fromSq and toSq from backend if available
                             if (moveData.fromSq && moveData.toSq) {
                                 console.log(`Move made: ${moveData.fromSq} -> ${moveData.toSq}`);
-                            } else {
-                                // fallback to local
-                                console.log(`Move made: ${prSq} (to)`);
                             }
+
                             // Reset UI and backend
                             fetch("http://localhost:5045/api/chess/resetusermove", { method: "POST" })
                             .then(() => setSelectedSquares({ from: null, to: null }));
+                        })
+                        .catch(() => {
+                            setSelectedSquares({ from: null, to: null });
+                            fetch("http://localhost:5045/api/chess/resetusermove", { method: "POST" });
                         });
                     }
                 }
@@ -126,15 +142,34 @@ function Board({ pieces }: { pieces: GuiPiece[] }) {
                             headers: { "Content-Type": "application/json" },
                             body: JSON.stringify(newSq),
                         })
-                        .then((res) => res.json())
+                        .then(() =>
+                            // Now call makemove after both from and to are set
+                            fetch("http://localhost:5045/api/chess/makeusermove", { method: "POST" })
+                        )
+                        .then(async (res) => {
+                            if (!res.ok) {
+                                //move was invalid
+                                setSelectedSquares({from: null, to: null});
+                                await fetch("http://localhost:5045/api/chess/resetusermove", { method: "POST" }); // reset backend
+                                return null;
+                            }
+                            return res.json();
+                        })
+                        
                         .then((moveData) => {
+                            if (!moveData) return;
+                            // Print move as algebraic: get fromSq and toSq from backend if available
                             if (moveData.fromSq && moveData.toSq) {
                                 console.log(`Move made: ${moveData.fromSq} -> ${moveData.toSq}`);
-                            } else {
-                                console.log(`Move made to: ${prSq}`);
                             }
+
+                            // Reset UI and backend
                             fetch("http://localhost:5045/api/chess/resetusermove", { method: "POST" })
                             .then(() => setSelectedSquares({ from: null, to: null }));
+                        })
+                        .catch(() => {
+                            setSelectedSquares({ from: null, to: null });
+                            fetch("http://localhost:5045/api/chess/resetusermove", { method: "POST" });
                         });
                     }
                 }

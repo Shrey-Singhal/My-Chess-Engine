@@ -4,19 +4,19 @@ namespace ChessEngineAPI.Engine
     public class ChessEngineState
     {
         // auto property with a public getter and a private setter so that only this class can modify the board.
-        public Gameboard Board { get; private set; }
-        private readonly Movegen movegen;
-        private readonly MoveManager moveManager;
-        private readonly PerfTesting perfTesting;
-        private readonly Search search;
+        public Gameboard Board { get; }
+        public Movegen Movegen { get; }
+        public MoveManager MoveManager { get; }
+        public PerfTesting PerfTesting { get; }
+        public Search Search { get; }
 
         public ChessEngineState()
         {
             Board = new Gameboard();
-            movegen = new();
-            moveManager = new(Board);
-            perfTesting = new(Board);
-            search = new(Board, movegen, moveManager);
+            Movegen = new Movegen();
+            MoveManager = new MoveManager(Board);
+            PerfTesting = new PerfTesting(Board);
+            Search = new Search(Board, Movegen, MoveManager);
 
             Defs.InitFilesRanksBoard();
             Board.InitHashKeys(); // set up random hash keys            
@@ -41,7 +41,7 @@ namespace ChessEngineAPI.Engine
                     posKey = 0
                 };
             }
-            movegen.InitMvvLva();
+            Movegen.InitMvvLva();
 
 
 
@@ -50,18 +50,6 @@ namespace ChessEngineAPI.Engine
 
             Board.PrintBoard();
 
-
-            // movegen.GenerateMoves(Board);
-            // movegen.PrintMoveList(Board);
-            // Board.CheckBoard();
-
-            // moveManager.MakeMove(Board.moveList[0], Board);
-            // Board.PrintBoard();
-            // Board.CheckBoard();
-            // moveManager.TakeMove();
-            // Board.PrintBoard();
-            // Board.CheckBoard();
-
         }
 
         public void SetPositionFromFEN(string FEN)
@@ -69,7 +57,7 @@ namespace ChessEngineAPI.Engine
             Board.ParseFEN(FEN);
             Board.PrintBoard();
 
-            search.SearchPosition();
+            Search.SearchPosition();
             Console.WriteLine("Success");
         }
 
