@@ -99,7 +99,16 @@ namespace ChessEngineAPI.Controllers
                 {
                     _engine.MoveManager.MakeMove(parsed, _engine.Board); // actually make the move
                     _engine.Board.PrintBoard();
-                    return Ok(new {
+
+                    var result = _engine.CheckResult();
+
+                    if (result != null)
+                    {
+                        return Ok(new { result });
+                    }
+
+                    return Ok(new
+                    {
                         message = "Move made",
                         fromSq = Defs.SqToPrSq(Defs.UserMove.from),
                         toSq = Defs.SqToPrSq(Defs.UserMove.to)

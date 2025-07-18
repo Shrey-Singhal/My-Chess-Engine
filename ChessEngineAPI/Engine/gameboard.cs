@@ -10,7 +10,7 @@ namespace ChessEngineAPI.Engine
 
         // Number of half-moves since the last pawn move or capture.
         // If 50 full moves (100 half-moves) occur without a capture or pawn move, the game can be declared a draw.
-        public int fiftyMove; 
+        public int fiftyMove;
         public int hisPly; // represents real moves played in the entire game and also used to index the history array
 
         // the history array stores game states for each real move made during the game.
@@ -84,7 +84,7 @@ namespace ChessEngineAPI.Engine
         //pvline stores the best full line of moves
         public int[] PvArray = new int[Defs.MAXDEPTH];
 
-        
+
 
         public Gameboard()
         {
@@ -527,7 +527,7 @@ namespace ChessEngineAPI.Engine
                     }
                     temp_sq += dir;
                     pce = pieces[temp_sq];
-                }                
+                }
             }
             // diagonal sliding pieces
             for (index = 0; index < 4; index++)
@@ -559,10 +559,48 @@ namespace ChessEngineAPI.Engine
                     PieceProperties.PieceKing[pce] && (int)PieceProperties.PieceCol[pce] == side)
                 {
                     return Defs.Bool.TRUE;
-                } 
+                }
             }
 
             return Defs.Bool.FALSE;
+        }
+
+        public bool DrawMaterial()
+        {
+            // If either side has pawns, or any queens/rooks, not a draw
+            if (pceNum[(int)Defs.Pieces.wP] != 0 || pceNum[(int)Defs.Pieces.bP] != 0)
+                return false;
+            if (pceNum[(int)Defs.Pieces.wQ] != 0 || pceNum[(int)Defs.Pieces.bQ] != 0 ||
+                pceNum[(int)Defs.Pieces.wR] != 0 || pceNum[(int)Defs.Pieces.bR] != 0)
+                return false;
+
+            // If either side has more than one bishop or knight, not a draw
+            if (pceNum[(int)Defs.Pieces.wB] > 1 || pceNum[(int)Defs.Pieces.bB] > 1)
+                return false;
+            if (pceNum[(int)Defs.Pieces.wN] > 1 || pceNum[(int)Defs.Pieces.bN] > 1)
+                return false;
+
+            // If both bishop and knight for either side, not a draw
+            if (pceNum[(int)Defs.Pieces.wN] != 0 && pceNum[(int)Defs.Pieces.wB] != 0)
+                return false;
+            if (pceNum[(int)Defs.Pieces.bN] != 0 && pceNum[(int)Defs.Pieces.bB] != 0)
+                return false;
+
+            // If none of the above, it's a draw by insufficient material
+            return true;
+        }
+        //This checks if the current position has occurred multiple times (for threefold repetition draw): 
+        public int ThreeFoldRep()
+        {
+            int reps = 0;
+            for (int i = 0; i < hisPly; ++i)
+            {
+                if (history[i].posKey == posKey)
+                {
+                    reps++;
+                }
+            }
+            return reps;
         }
 
     }

@@ -94,5 +94,48 @@ namespace ChessEngineAPI.Engine
             return guiPieces;
         }
 
+        public string? CheckResult()
+        {
+            // check for fifty-move rule
+            if (Board.fiftyMove >= 100)
+                return "draw:fifty move rule";
+
+            // check for threefold repetition
+            if (Board.ThreeFoldRep() >= 3)
+                return "draw:threefold repetition";
+
+            // check for insufficient material
+            if (Board.DrawMaterial())
+                return "draw:insufficient material";
+
+            // Generate all moves
+            Movegen.GenerateMoves(Board);
+
+            // Check for legal moves (if any exist, not game over)
+            bool foundMove = false;
+            for (int i = Board.moveListStart[Board.ply]; i < Board.moveListStart[Board.ply + 1]; ++i)
+            {
+                if (MoveManager.MakeMove(Board.moveList[i], Board))
+                {
+                    MoveManager.TakeMove();
+                    foundMove = true;
+                    break;
+                }
+            }
+            if (foundMove) return null; // game continues
+
+            // No legal moves means checkmate or stalemate
+            int kingSq = Board.pList[Gameboard.PCEINDEX(Board.side == (int)Defs.Colours.WHITE ? (int)Defs.Pieces.wK : (int)Defs.Pieces.bK, 0)];
+            int inCheck = Board.SqAttacked(kingSq, ((int)Board.side) ^ 1);
+            if (inCheck == Defs.Bool.TRUE)
+            {
+                return Board.side == (int)Defs.Colours.WHITE ? "checkmate:black" : "checkmate:white";
+            }
+            else
+            {
+                return "draw:stalemate";
+            }
+        }
+
     }
 }
