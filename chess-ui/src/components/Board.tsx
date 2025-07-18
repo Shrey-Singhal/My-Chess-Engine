@@ -9,9 +9,10 @@ type GuiPiece = {
 type BoardProps = {
     pieces: GuiPiece[];
     fetchPieces: () => void;
+    setModalMsg: (msg: string | null) => void;
 }
 
-function Board({ pieces, fetchPieces }: BoardProps) {
+function Board({ pieces, fetchPieces, setModalMsg }: BoardProps) {
     //const [pieces, setPieces] = useState<GuiPiece[]>([]);
     const squares_style = "absolute w-[60px] h-[60px]";
     const [selectedSquares, setSelectedSquares] = useState<{
@@ -19,6 +20,8 @@ function Board({ pieces, fetchPieces }: BoardProps) {
         to: { file: number; rank: number } | null;
     }>({ from: null, to: null });
     
+    //const [gameStatus, setGameStatus] = useState<string | null>(null);
+
     const boardRef = useRef<HTMLDivElement>(null);
 
     //render squares
@@ -121,6 +124,11 @@ function Board({ pieces, fetchPieces }: BoardProps) {
                         
                         .then((moveData) => {
                             if (!moveData) return;
+
+                            if (moveData.result) {
+                                setModalMsg(moveData.result);
+                            }
+
                             // Print move as algebraic: get fromSq and toSq from backend if available
                             if (moveData.fromSq && moveData.toSq) {
                                 console.log(`Move made: ${moveData.fromSq} -> ${moveData.toSq}`);
@@ -169,6 +177,11 @@ function Board({ pieces, fetchPieces }: BoardProps) {
                         
                         .then((moveData) => {
                             if (!moveData) return;
+
+                            if (moveData.result) {
+                                setModalMsg(moveData.result);
+                            }
+
                             // Print move as algebraic: get fromSq and toSq from backend if available
                             if (moveData.fromSq && moveData.toSq) {
                                 console.log(`Move made: ${moveData.fromSq} -> ${moveData.toSq}`);
