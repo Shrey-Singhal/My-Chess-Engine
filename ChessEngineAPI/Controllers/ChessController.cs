@@ -118,5 +118,12 @@ namespace ChessEngineAPI.Controllers
             }
             return BadRequest("Both 'from' and 'to' must be set");
         }
+        
+        [HttpGet("enginestats")]
+        public IActionResult GetEngineStats()
+        {
+            var stats = _engine.Search.GetSearchStats();
+            return Ok(stats);
+        }
     }
 }

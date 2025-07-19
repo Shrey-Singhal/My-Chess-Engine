@@ -14,9 +14,12 @@ namespace ChessEngineAPI.Engine
         public static bool Stop { get; set; }
         public static int Best { get; set; } //best move found
         public static bool Thinking { get; set; } // flag to indicate if the engine is currently searching
+
+        public static int LastScore { get; set; }
+        public static int LastDepth { get; set; }
     }
-    
-    
+
+
 
     public class Search(Gameboard board, Movegen movegen, MoveManager moveManager)
     {
@@ -166,7 +169,7 @@ namespace ChessEngineAPI.Engine
                     alpha = Score;
                     BestMove = Move;
                 }
-                    
+
             }
             if (alpha != OldAlpha)
             {
@@ -229,7 +232,7 @@ namespace ChessEngineAPI.Engine
             int BestMove = MoveUtils.NO_MOVE;
             int Move;
             int PvMove = PvTable.ProbePvTable(board);
-            
+
             if (PvMove != MoveUtils.NO_MOVE)
             {
                 for (MoveNum = board.moveListStart[board.ply]; MoveNum < board.moveListStart[board.ply + 1]; ++MoveNum)
@@ -369,7 +372,7 @@ namespace ChessEngineAPI.Engine
             SearchController.Time = 10000; // 10 seconds
 
             // starts a loop for iterative deepening search
-            for (currentDepth = 1; currentDepth <= /*SearchController.Depth */ 6; ++currentDepth)
+            for (currentDepth = 1; currentDepth <= SearchController.Depth; ++currentDepth)
             {
                 bestScore = AlphaBeta(-Defs.INFINITE, Defs.INFINITE, currentDepth);
                 if (SearchController.Stop) //breaks early if search us inturrupted
@@ -400,6 +403,41 @@ namespace ChessEngineAPI.Engine
             SearchController.Best = bestMove;
             SearchController.Thinking = false;
 
+            SearchController.LastScore = bestScore;
+            SearchController.LastDepth = currentDepth - 1; // currentDepth overshoots by 1 after loop
+
+        }
+        public object GetSearchStats()
+        {
+            double ordering = SearchController.Fh > 0 ? SearchController.Fhf / (double)SearchController.Fh * 100 : 0;
+            double elapsedTime = (DateTime.Now - SearchController.Start).TotalSeconds;
+            string bestMoveStr = movegen.PrintMove(SearchController.Best);
+
+            int MATE = 1000000;
+            int MAXDEPTH = 64;
+
+            string scoreText;
+            int score = SearchController.LastScore;    // <-- Use this now
+            int depth = SearchController.LastDepth;    // <-- And this
+
+            if (Math.Abs(score) > MATE - MAXDEPTH)
+            {
+                scoreText = $"Score: Mate In {MATE - Math.Abs(score) - 1} moves";
+            }
+            else
+            {
+                scoreText = $"Score: {(score / 100.0):F2}";
+            }
+
+            return new
+            {
+                ordering = ordering.ToString("F2") + "%",
+                depth = depth,
+                scoreText,
+                nodes = SearchController.Nodes,
+                time = elapsedTime.ToString("F1") + "s",
+                bestMove = bestMoveStr
+            };
         }
 
     }
