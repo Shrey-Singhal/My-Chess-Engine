@@ -24,11 +24,11 @@ const ChessGame = () => {
         .catch((err) => console.error("Failed to fetch pieces:", err));
     };
 
-    const handleEngineMove = () => {
+    const handleEngineMove = (timeOverride?: number) => {
         fetch("http://localhost:5045/api/chess/engineMove", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ timeMs: engineTime }),
+            body: JSON.stringify({ Time: timeOverride ?? engineTime }),
         })
         .then(res => res.json())
         .then((data) => {
@@ -44,11 +44,11 @@ const ChessGame = () => {
     return (
         <>
             <SetFen fetchPieces={fetchPieces} />
-            <Board pieces={pieces} fetchPieces={fetchPieces} setModalMsg={setModalMsg} onEngineMove={handleEngineMove}/>
+            <Board pieces={pieces} fetchPieces={fetchPieces} setModalMsg={setModalMsg} onEngineMove={handleEngineMove} engineTime={engineTime}/>
             <ResultModal show={!!modalMsg} onClose={() => setModalMsg(null)}>
               {modalMsg}
             </ResultModal>
-            <EngineOutput onEngineMove={handleEngineMove} setEngineTime={setEngineTime}/>
+            <EngineOutput onEngineMove={handleEngineMove} setEngineTime={setEngineTime} engineTime = {engineTime}/>
         </>
     );
 }

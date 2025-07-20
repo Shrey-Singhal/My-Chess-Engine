@@ -10,10 +10,11 @@ type BoardProps = {
     pieces: GuiPiece[];
     fetchPieces: () => void;
     setModalMsg: (msg: string | null) => void;
-    onEngineMove: ()=> void;
+    onEngineMove: (t: number)=> void;
+    engineTime: number;
 }
 
-function Board({ pieces, fetchPieces, setModalMsg, onEngineMove }: BoardProps) {
+function Board({ pieces, fetchPieces, setModalMsg, onEngineMove, engineTime }: BoardProps) {
     //const [pieces, setPieces] = useState<GuiPiece[]>([]);
     const squares_style = "absolute w-[60px] h-[60px]";
     const [selectedSquares, setSelectedSquares] = useState<{
@@ -139,7 +140,7 @@ function Board({ pieces, fetchPieces, setModalMsg, onEngineMove }: BoardProps) {
                             fetch("http://localhost:5045/api/chess/resetusermove", { method: "POST" })
                             .then(() => setSelectedSquares({ from: null, to: null }));
 
-                            onEngineMove();
+                            onEngineMove(engineTime);
                         })
                         .catch(() => {
                             setSelectedSquares({ from: null, to: null });
@@ -194,7 +195,7 @@ function Board({ pieces, fetchPieces, setModalMsg, onEngineMove }: BoardProps) {
                             fetch("http://localhost:5045/api/chess/resetusermove", { method: "POST" })
                             .then(() => setSelectedSquares({ from: null, to: null }));
 
-                            onEngineMove();
+                            onEngineMove(engineTime);
                         })
                         .catch(() => {
                             setSelectedSquares({ from: null, to: null });

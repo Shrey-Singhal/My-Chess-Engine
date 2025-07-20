@@ -10,11 +10,12 @@ type EngineStats = {
 };
 
 type EngineOutputProps = {
-    onEngineMove: () => void;
+    onEngineMove: (time: number) => void;
     setEngineTime: (t: number) => void;
+    engineTime: number;
 }
 
-function EngineOutput({onEngineMove, setEngineTime}: EngineOutputProps) {
+function EngineOutput({onEngineMove, setEngineTime, engineTime}: EngineOutputProps) {
     const buttonClass = "border border-gray-400 bg-gray-100 rounded px-2 py-1 mb-2";
 
     const [engineStats, setEngineStats] = useState<EngineStats>({
@@ -62,7 +63,7 @@ function EngineOutput({onEngineMove, setEngineTime}: EngineOutputProps) {
                 type="button" 
                 className={buttonClass} 
                 id="SearchButton"
-                onClick={onEngineMove}
+                onClick={() => onEngineMove(engineTime)}
             >
                     Move Now
             </button>
