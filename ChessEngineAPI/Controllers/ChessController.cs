@@ -4,6 +4,10 @@ using ChessEngineAPI.Engine;
 
 namespace ChessEngineAPI.Controllers
 {
+    public class EngineSearchParams
+    {
+        public int Time { get; set; }
+    }
     [ApiController]
     [Route("api/chess")]
     public class ChessController(ChessEngineState engine) : ControllerBase
@@ -118,12 +122,37 @@ namespace ChessEngineAPI.Controllers
             }
             return BadRequest("Both 'from' and 'to' must be set");
         }
-        
+
         [HttpGet("enginestats")]
         public IActionResult GetEngineStats()
         {
             var stats = _engine.Search.GetSearchStats();
             return Ok(stats);
+        }
+
+        [HttpPost("engineMove")]
+        public IActionResult EngineMove([FromBody] EngineSearchParams searchParams)
+        {
+            var result = _engine.CheckResult();
+            if (result != null)
+                return BadRequest("Game is over.");
+
+            SearchController.Depth = Defs.MAXDEPTH;
+            SearchController.Time = searchParams?.Time > 0 ? searchParams.Time : 1000;
+
+            _engine.Search.SearchPosition();
+
+            int bestMove = SearchController.Best;
+            if (bestMove == MoveUtils.NO_MOVE)
+                return BadRequest("No valid move found");
+
+            _engine.MoveManager.MakeMove(bestMove, _engine.Board);
+
+            return Ok(new {
+                pieces = _engine.GetGuiPieces(),
+                stats = _engine.Search.GetSearchStats(),
+                result = _engine.CheckResult() // check for mate/draw now
+            });
         }
     }
 }

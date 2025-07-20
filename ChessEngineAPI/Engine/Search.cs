@@ -369,7 +369,6 @@ namespace ChessEngineAPI.Engine
             int pvNum;
 
             ClearForSearch();
-            SearchController.Time = 10000; // 10 seconds
 
             // starts a loop for iterative deepening search
             for (currentDepth = 1; currentDepth <= SearchController.Depth; ++currentDepth)

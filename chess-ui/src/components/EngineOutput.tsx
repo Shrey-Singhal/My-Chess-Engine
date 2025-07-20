@@ -9,7 +9,12 @@ type EngineStats = {
     time: string;
 };
 
-function EngineOutput() {
+type EngineOutputProps = {
+    onEngineMove: () => void;
+    setEngineTime: (t: number) => void;
+}
+
+function EngineOutput({onEngineMove, setEngineTime}: EngineOutputProps) {
     const buttonClass = "border border-gray-400 bg-gray-100 rounded px-2 py-1 mb-2";
 
     const [engineStats, setEngineStats] = useState<EngineStats>({
@@ -20,6 +25,7 @@ function EngineOutput() {
         ordering: "",
         time: "",
     });
+
 
     // Fetch stats every second (while searching)
     useEffect(() => {
@@ -35,7 +41,10 @@ function EngineOutput() {
     return (
         <div className="absolute left-[600px] top-[250px]">
             Thinking Time: <br/>
-            <select className="border border-gray-400 bg-white rounded px-2 py-1">
+            <select 
+                className="border border-gray-400 bg-white rounded px-2 py-1"
+                onChange={e => setEngineTime(Number(e.target.value) * 1000)}
+            >
                 <option value = "1">1s</option>
                 <option value = "2">2s</option>
                 <option value = "4">4s</option>
@@ -49,7 +58,15 @@ function EngineOutput() {
             <span id="NodesOut">Nodes: {engineStats.nodes}</span><br/>
             <span id="OrderingOut">Ordering: {engineStats.ordering}</span><br/>
             <span id="TimeOut">Time: {engineStats.time}</span><br/><br/>
-            <button type="button" className={buttonClass} id="SearchButton">Move Now</button><br/>
+            <button 
+                type="button" 
+                className={buttonClass} 
+                id="SearchButton"
+                onClick={onEngineMove}
+            >
+                    Move Now
+            </button>
+            <br/>
             <button type="button" className={buttonClass} id="NewGameButton">New Game</button><br/>
             <button type="button" className={buttonClass} id="FlipButton">Flip Board</button><br/><br/>
             <button type="button" className={buttonClass} id="TakeButton">Take Back</button><br/><br/><br/>
