@@ -13,9 +13,11 @@ type EngineOutputProps = {
     onEngineMove: (time: number) => void;
     setEngineTime: (t: number) => void;
     engineTime: number;
+    onTakeBack: () => void;
+    onNewGame: () => void;
 }
 
-function EngineOutput({onEngineMove, setEngineTime, engineTime}: EngineOutputProps) {
+function EngineOutput({onEngineMove, setEngineTime, engineTime, onTakeBack, onNewGame}: EngineOutputProps) {
     const buttonClass = "border border-gray-400 bg-gray-100 rounded px-2 py-1 mb-2";
 
     const [engineStats, setEngineStats] = useState<EngineStats>({
@@ -38,6 +40,7 @@ function EngineOutput({onEngineMove, setEngineTime, engineTime}: EngineOutputPro
 
         return () => clearInterval(interval);
     }, []);
+
 
     return (
         <div className="absolute left-[800px] top-[250px]">
@@ -68,9 +71,23 @@ function EngineOutput({onEngineMove, setEngineTime, engineTime}: EngineOutputPro
                     Move Now
             </button>
             <br/>
-            <button type="button" className={buttonClass} id="NewGameButton">New Game</button><br/>
+            <button 
+                type="button" 
+                className={buttonClass} 
+                id="NewGameButton"
+                onClick={onNewGame}
+            >
+                New Game
+            </button><br/>
             <button type="button" className={buttonClass} id="FlipButton">Flip Board</button><br/><br/>
-            <button type="button" className={buttonClass} id="TakeButton">Take Back</button><br/><br/><br/>
+            <button 
+                type="button" 
+                className={buttonClass} 
+                id="TakeButton"
+                onClick={onTakeBack}
+            >
+                Take Back
+            </button><br/><br/><br/>
             <span id="GameStatus"></span>
         </div>
     );

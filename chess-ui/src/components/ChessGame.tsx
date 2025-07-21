@@ -37,6 +37,24 @@ const ChessGame = () => {
         });
     };
 
+    const handleTakeBack = () => {
+        fetch("http://localhost:5045/api/chess/takemove", { method: "POST" })
+        .then(res => res.json())
+        .then(data => {
+            setPieces(data.pieces);
+            if (data.result) setModalMsg(data.result);
+        });
+    };
+
+    const handleNewGame = () => {
+        fetch("http://localhost:5045/api/chess/newgame", { method: "POST" })
+        .then(res => res.json())
+        .then(data => {
+            setPieces(data.pieces);
+            setModalMsg(null);  // Clear result modal
+        });
+    };
+
     useEffect(() => {
         fetchPieces();
     }, []);
@@ -48,7 +66,13 @@ const ChessGame = () => {
             <ResultModal show={!!modalMsg} onClose={() => setModalMsg(null)}>
               {modalMsg}
             </ResultModal>
-            <EngineOutput onEngineMove={handleEngineMove} setEngineTime={setEngineTime} engineTime = {engineTime}/>
+            <EngineOutput 
+                onEngineMove={handleEngineMove} 
+                setEngineTime={setEngineTime} 
+                engineTime = {engineTime}
+                onTakeBack={handleTakeBack}
+                onNewGame={handleNewGame}
+            />
         </>
     );
 }

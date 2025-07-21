@@ -148,11 +148,54 @@ namespace ChessEngineAPI.Controllers
 
             _engine.MoveManager.MakeMove(bestMove, _engine.Board);
 
-            return Ok(new {
+            return Ok(new
+            {
                 pieces = _engine.GetGuiPieces(),
                 stats = _engine.Search.GetSearchStats(),
                 result = _engine.CheckResult() // check for mate/draw now
             });
         }
+
+        [HttpPost("takemove")]
+        public IActionResult TakeMove()
+        {
+            if (_engine.Board.hisPly > 0)
+            {
+                _engine.MoveManager.TakeMove();
+                _engine.Board.ply = 0;
+                
+
+                // Refresh the board state
+                return Ok(new
+                {
+                    pieces = _engine.GetGuiPieces(),
+                    stats = _engine.Search.GetSearchStats(),
+                    result = _engine.CheckResult()
+                });
+            }
+            else
+            {
+                return Ok(new
+                {
+                    pieces = _engine.GetGuiPieces(),
+                    stats = _engine.Search.GetSearchStats(),
+                    result = _engine.CheckResult(),
+                    info = "No more moves to take back"
+                }); 
+            }
+            
+        }
+        
+        [HttpPost("newgame")]
+        public IActionResult NewGame()
+        {
+            _engine.Board.ParseFEN(Defs.START_FEN);    // reset to initial position
+            _engine.Search.ClearForSearch();
+            return Ok(new {
+                pieces = _engine.GetGuiPieces(),
+                stats = _engine.Search.GetSearchStats(),
+            });
+        }
+
     }
 }
