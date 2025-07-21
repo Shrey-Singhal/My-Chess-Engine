@@ -51,7 +51,7 @@ function Board({ pieces, fetchPieces, setModalMsg, onEngineMove, engineTime }: B
                 const combinedClass = `${squares_style} ${rankClass} ${fileClass} ${colorClass} ${selectedClass}`;
                 squares.push(
                     <div
-                        key={`${rankClass}-${fileClass}`}
+                        key={`${rank}-${file}`}
                         className={combinedClass}
                         style={{
                             width: SQUARE_SIZE,
@@ -78,8 +78,8 @@ function Board({ pieces, fetchPieces, setModalMsg, onEngineMove, engineTime }: B
         const pageX = Math.floor(e.pageX);
         const pageY = Math.floor(e.pageY);
 
-        const file = Math.floor((pageX - workedX) / 60);
-        const rank = 7 - Math.floor((pageY - workedY) / 60);
+        const file = Math.floor((pageX - workedX) / SQUARE_SIZE);
+        const rank = 7 - Math.floor((pageY - workedY) / SQUARE_SIZE);
 
         // Call backend to convert file/rank to 120-based square index & printable square
         fetch(`http://localhost:5045/api/chess/fr2sq?file=${file}&rank=${rank}`)
