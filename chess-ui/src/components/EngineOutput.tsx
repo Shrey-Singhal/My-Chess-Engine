@@ -1,9 +1,6 @@
-import React, { useEffect, useState } from "react";
-
 type EngineStats = {
     bestMove: string;
     depth: number;
-    scoreText: string;
     nodes: number;
     ordering: string;
     time: string;
@@ -15,31 +12,11 @@ type EngineOutputProps = {
     engineTime: number;
     onTakeBack: () => void;
     onNewGame: () => void;
+    engineStats: EngineStats;
 }
 
-function EngineOutput({onEngineMove, setEngineTime, engineTime, onTakeBack, onNewGame}: EngineOutputProps) {
+function EngineOutput({onEngineMove, setEngineTime, engineTime, onTakeBack, onNewGame, engineStats}: EngineOutputProps) {
     const buttonClass = "border border-gray-400 bg-gray-100 rounded px-2 py-1 mb-2";
-
-    const [engineStats, setEngineStats] = useState<EngineStats>({
-        bestMove: "",
-        depth: 0,
-        scoreText: "",
-        nodes: 0,
-        ordering: "",
-        time: "",
-    });
-
-
-    // Fetch stats every second (while searching)
-    useEffect(() => {
-        const interval = setInterval(() => {
-            fetch("http://localhost:5045/api/chess/enginestats")
-                .then((res) => res.json())
-                .then((data) => setEngineStats(data));
-        }, 1000);
-
-        return () => clearInterval(interval);
-    }, []);
 
 
     return (
@@ -58,7 +35,6 @@ function EngineOutput({onEngineMove, setEngineTime, engineTime, onTakeBack, onNe
             </select><br/><br/><br/>
             <span id="BestOut">BestMove: {engineStats.bestMove}</span><br/>
             <span id="DepthOut">Depth: {engineStats.depth}</span><br/>
-            <span id="ScoreOut">Score: {engineStats.scoreText}</span><br/>
             <span id="NodesOut">Nodes: {engineStats.nodes}</span><br/>
             <span id="OrderingOut">Ordering: {engineStats.ordering}</span><br/>
             <span id="TimeOut">Time: {engineStats.time}</span><br/><br/>

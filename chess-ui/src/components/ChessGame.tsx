@@ -9,11 +9,24 @@ type GuiPiece = {
     rankClass: string;
     imagePath: string;
 }
-
+type EngineStats = {
+    bestMove: string;
+    depth: number;
+    nodes: number;
+    ordering: string;
+    time: string;
+};
 const ChessGame = () => {
     const [pieces, setPieces] = useState<GuiPiece[]>([]);
     const [modalMsg, setModalMsg] = useState<string | null>(null);
     const [engineTime, setEngineTime] = useState<number>(1000); // default 1s
+    const [engineStats, setEngineStats] = useState<EngineStats>({
+        bestMove: "",
+        depth: 0,
+        nodes: 0,
+        ordering: "",
+        time: "",
+    });
 
     const fetchPieces = () => {
         fetch("http://localhost:5045/api/chess/getpieces")
@@ -34,6 +47,10 @@ const ChessGame = () => {
         .then((data) => {
             fetchPieces();
             if (data.result) setModalMsg(data.result);
+
+            fetch("http://localhost:5045/api/chess/enginestats")
+            .then(res => res.json())
+            .then(setEngineStats);
         });
     };
 
@@ -72,6 +89,7 @@ const ChessGame = () => {
                 engineTime = {engineTime}
                 onTakeBack={handleTakeBack}
                 onNewGame={handleNewGame}
+                engineStats={engineStats}
             />
         </>
     );

@@ -425,14 +425,13 @@ namespace ChessEngineAPI.Engine
             }
             else
             {
-                scoreText = $"Score: {(score / 100.0):F2}";
+                scoreText = $"Score: {score / 100.0:F2}";
             }
 
             return new
             {
                 ordering = ordering.ToString("F2") + "%",
-                depth = depth,
-                scoreText,
+                depth,
                 nodes = SearchController.Nodes,
                 time = elapsedTime.ToString("F1") + "s",
                 bestMove = bestMoveStr
