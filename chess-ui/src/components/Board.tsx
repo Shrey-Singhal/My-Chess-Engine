@@ -16,7 +16,9 @@ type BoardProps = {
 
 function Board({ pieces, fetchPieces, setModalMsg, onEngineMove, engineTime }: BoardProps) {
     //const [pieces, setPieces] = useState<GuiPiece[]>([]);
-    const squares_style = "absolute w-[60px] h-[60px]";
+    const squares_style = "absolute";
+    const BOARD_SIZE = 600;
+    const SQUARE_SIZE = BOARD_SIZE / 8;
     const [selectedSquares, setSelectedSquares] = useState<{
         from: { file: number; rank: number } | null;
         to: { file: number; rank: number } | null;
@@ -33,10 +35,10 @@ function Board({ pieces, fetchPieces, setModalMsg, onEngineMove, engineTime }: B
 
         for (let rank = 7; rank >= 0; rank--) {
             light ^= 1;
-            const rankClass = `rank${rank + 1}`;
+            const rankClass = { top: `${(7 - rank) * SQUARE_SIZE}px` };
 
             for (let file = 0; file <= 7; file++) {
-                const fileClass = `file${file + 1}`;
+                const fileClass = { left: `${file * SQUARE_SIZE}px` };
                 const colorClass = light === 0 ? "Light" : "Dark";
                 light ^= 1;
 
@@ -51,6 +53,12 @@ function Board({ pieces, fetchPieces, setModalMsg, onEngineMove, engineTime }: B
                     <div
                         key={`${rankClass}-${fileClass}`}
                         className={combinedClass}
+                        style={{
+                            width: SQUARE_SIZE,
+                            height: SQUARE_SIZE,
+                            left: file * SQUARE_SIZE,
+                            top: (7 - rank) * SQUARE_SIZE,
+                        }}
                         onClick={(e) => handleClick(e, "Square")}
                     ></div>
                 );
@@ -210,7 +218,8 @@ function Board({ pieces, fetchPieces, setModalMsg, onEngineMove, engineTime }: B
 
     return (
         <div
-            className="relative top-5 left-14 w-[480px] h-[480px]"
+            className="relative top-5 left-32"
+            style={{ width: BOARD_SIZE, height:BOARD_SIZE }}
             ref={boardRef}
             id="Board"
         >
@@ -219,11 +228,19 @@ function Board({ pieces, fetchPieces, setModalMsg, onEngineMove, engineTime }: B
                 const rankClass = p.rankClass;
                 const fileClass = p.fileClass;
                 const imgSrc = `/images/${p.imagePath}`;
+                const rank = parseInt(p.rankClass.replace('rank', ''));
+                const file = parseInt(p.fileClass.replace('file', ''));
                 return (
                     <img
                         key={i}
                         src={imgSrc}
-                        className={`Piece ${rankClass} ${fileClass} absolute w-[60px] h-[60px]`}
+                        className={`Piece ${rankClass} ${fileClass}`}
+                        style={{
+                            width: SQUARE_SIZE,
+                            height: SQUARE_SIZE,
+                            top: `${(8 - rank) * SQUARE_SIZE}px`,
+                            left: `${(file - 1) * SQUARE_SIZE}px`,
+                        }}
                         alt={p.imagePath}
                         onClick={(e) => handleClick(e, "Piece")}
                     />

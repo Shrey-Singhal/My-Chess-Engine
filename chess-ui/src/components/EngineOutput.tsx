@@ -40,7 +40,7 @@ function EngineOutput({onEngineMove, setEngineTime, engineTime}: EngineOutputPro
     }, []);
 
     return (
-        <div className="absolute left-[600px] top-[250px]">
+        <div className="absolute left-[800px] top-[250px]">
             Thinking Time: <br/>
             <select 
                 className="border border-gray-400 bg-white rounded px-2 py-1"
