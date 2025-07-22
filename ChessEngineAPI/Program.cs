@@ -47,8 +47,7 @@ var app = builder.Build();
 
 // ─── MIDDLEWARE ORDER ────────────────────────────────────────────────────────────
 
-// Redirect HTTP→HTTPS (still allows CORS headers)
-app.UseHttpsRedirection();
+
 
 // Must be before UseCors & MapControllers when using endpoint routing
 app.UseRouting();
@@ -58,6 +57,12 @@ app.UseCors("AllowAll");
 
 // Now sessions can read/write the cookie that CORS just allowed
 app.UseSession();
+
+// Redirect HTTP→HTTPS (still allows CORS headers)
+app.UseHttpsRedirection();
+
+app.MapGet("/api/ping", () => Results.Ok("pong"))
+   .RequireCors("AllowAll");
 
 
 // Swagger in dev
