@@ -39,11 +39,7 @@ app.UseHttpsRedirection();
 
 app.MapControllers();
 
-app.MapGet("/api/newgame", () =>
-{
-    return Results.Ok("New Chess game created and board initialized");
-})
-.WithName("GetNewGame")
+app.MapGet("/", () => Results.Ok("Welcome to my Chess Engine API"))
 .WithOpenApi();
 
 app.Run();
