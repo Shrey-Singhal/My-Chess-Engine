@@ -1,8 +1,8 @@
-import React, { useState, useEffect } from "react";
-import Board from "./board";
-import SetFen from "./setFEN";
+import { useState, useEffect } from "react";
+import Board from "./Board";
+import SetFEN from "./SetFEN";
 import ResultModal from "./ResultModal";
-import EngineOutput from "./engineOutput";
+import EngineOutput from "./EngineOutput";
 
 type GuiPiece = {
     fileClass: string;
@@ -81,7 +81,7 @@ const ChessGame = () => {
 
     return (
         <>
-            <SetFen fetchPieces={fetchPieces} />
+            <SetFEN fetchPieces={fetchPieces} />
             <Board pieces={pieces} fetchPieces={fetchPieces} setModalMsg={setModalMsg} onEngineMove={handleEngineMove} engineTime={engineTime} flipped={flipped}/>
             <ResultModal show={!!modalMsg} onClose={() => setModalMsg(null)}>
               {modalMsg}
