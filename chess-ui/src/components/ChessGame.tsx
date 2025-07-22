@@ -17,6 +17,7 @@ type EngineStats = {
     time: string;
 };
 const ChessGame = () => {
+    const BASE = process.env.REACT_APP_API_BASE_URL;
     const [pieces, setPieces] = useState<GuiPiece[]>([]);
     const [modalMsg, setModalMsg] = useState<string | null>(null);
     const [engineTime, setEngineTime] = useState<number>(1000); // default 1s
@@ -31,7 +32,7 @@ const ChessGame = () => {
 
 
     const fetchPieces = () => {
-        fetch("http://localhost:5045/api/chess/getpieces")
+        fetch(`${BASE}/getpieces`)
         .then((res) => res.json())
         .then((data: GuiPiece[]) => {
             setPieces(data);
@@ -40,7 +41,7 @@ const ChessGame = () => {
     };
 
     const handleEngineMove = (timeOverride?: number) => {
-        fetch("http://localhost:5045/api/chess/engineMove", {
+        fetch(`${BASE}/engineMove`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ Time: timeOverride ?? engineTime }),
@@ -50,14 +51,14 @@ const ChessGame = () => {
             fetchPieces();
             if (data.result) setModalMsg(data.result);
 
-            fetch("http://localhost:5045/api/chess/enginestats")
+            fetch(`${BASE}/enginestats`)
             .then(res => res.json())
             .then(setEngineStats);
         });
     };
 
     const handleTakeBack = () => {
-        fetch("http://localhost:5045/api/chess/takemove", { method: "POST" })
+        fetch(`${BASE}/takemove`, { method: "POST" })
         .then(res => res.json())
         .then(data => {
             setPieces(data.pieces);
@@ -66,7 +67,7 @@ const ChessGame = () => {
     };
 
     const handleNewGame = () => {
-        fetch("http://localhost:5045/api/chess/newgame", { method: "POST" })
+        fetch(`${BASE}/newgame`, { method: "POST" })
         .then(res => res.json())
         .then(data => {
             setPieces(data.pieces);

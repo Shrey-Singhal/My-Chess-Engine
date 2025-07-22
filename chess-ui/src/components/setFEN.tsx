@@ -2,9 +2,10 @@ import { useState } from "react";
 
 const SetFEN = ({fetchPieces}: {fetchPieces: () => void}) => {
     const [fen, setFen] = useState("");
+    const BASE = process.env.REACT_APP_API_BASE_URL;
 
     const sendFEN = async () => {
-        const res = await fetch("http://localhost:5045/api/chess/setfen", {
+        const res = await fetch(`${BASE}/setfen`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ fen }),
