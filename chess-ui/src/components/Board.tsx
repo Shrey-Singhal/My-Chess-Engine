@@ -12,11 +12,11 @@ type BoardProps = {
     setModalMsg: (msg: string | null) => void;
     onEngineMove: (t: number)=> void;
     engineTime: number;
+    flipped: boolean;
 }
 
-function Board({ pieces, fetchPieces, setModalMsg, onEngineMove, engineTime }: BoardProps) {
+function Board({ pieces, fetchPieces, setModalMsg, onEngineMove, engineTime, flipped }: BoardProps) {
     //const [pieces, setPieces] = useState<GuiPiece[]>([]);
-    const squares_style = "absolute";
     const BOARD_SIZE = 600;
     const SQUARE_SIZE = BOARD_SIZE / 8;
     const [selectedSquares, setSelectedSquares] = useState<{
@@ -26,41 +26,46 @@ function Board({ pieces, fetchPieces, setModalMsg, onEngineMove, engineTime }: B
     
     //const [gameStatus, setGameStatus] = useState<string | null>(null);
 
+    function toLogicalSquare(displayFile: number, displayRank: number) {
+        const file = flipped ? 7 - displayFile : displayFile;
+        const rank = flipped ? displayRank : 7 - displayRank;
+        return { file, rank };
+    }
+
+
     const boardRef = useRef<HTMLDivElement>(null);
 
     //render squares
     const generateBoardSquares = (): JSX.Element[] => {
         const squares: JSX.Element[] = [];
-        let light = 1;
 
-        for (let rank = 7; rank >= 0; rank--) {
-            light ^= 1;
-            const rankClass = { top: `${(7 - rank) * SQUARE_SIZE}px` };
+        for (let displayRank = 0; displayRank < 8; displayRank++) {
 
-            for (let file = 0; file <= 7; file++) {
-                const fileClass = { left: `${file * SQUARE_SIZE}px` };
-                const colorClass = light === 0 ? "Light" : "Dark";
-                light ^= 1;
+            for (let displayFile = 0; displayFile < 8; displayFile++) {
+                const { file, rank } = toLogicalSquare(displayFile, displayRank);
 
+                const isLight = (file + rank) % 2 === 0;
                 const isSelected =
-                    (selectedSquares.from?.file === file && selectedSquares.from?.rank === rank) ||
-                    (selectedSquares.to?.file === file && selectedSquares.to?.rank === rank);
+                    (selectedSquares.from?.file === file &&
+                        selectedSquares.from?.rank === rank) ||
+                    (selectedSquares.to?.file === file &&
+                        selectedSquares.to?.rank === rank);
 
-                const selectedClass = isSelected ? "SqSelected" : "";
-
-                const combinedClass = `${squares_style} ${rankClass} ${fileClass} ${colorClass} ${selectedClass}`;
+                //const combinedClass = `${squares_style} ${rankClass} ${fileClass} ${colorClass} ${selectedClass}`;
                 squares.push(
                     <div
-                        key={`${rank}-${file}`}
-                        className={combinedClass}
+                        key={`sq-${displayRank}-${displayFile}`}
+                        className={`absolute ${isLight ? "Light" : "Dark"} ${
+                        isSelected ? "SqSelected" : ""
+                        }`}
                         style={{
-                            width: SQUARE_SIZE,
-                            height: SQUARE_SIZE,
-                            left: file * SQUARE_SIZE,
-                            top: (7 - rank) * SQUARE_SIZE,
+                        width: SQUARE_SIZE,
+                        height: SQUARE_SIZE,
+                        top: displayRank * SQUARE_SIZE,
+                        left: displayFile * SQUARE_SIZE,
                         }}
                         onClick={(e) => handleClick(e, "Square")}
-                    ></div>
+                    />
                 );
             }
         }
@@ -69,17 +74,14 @@ function Board({ pieces, fetchPieces, setModalMsg, onEngineMove, engineTime }: B
     };
 
     const handleClick = (e: React.MouseEvent, type: "Piece" | "Square") => {
-        const position = boardRef.current?.getBoundingClientRect();
-        if (!position) return;
+        if (!boardRef.current) return;
+        const { left, top } = boardRef.current.getBoundingClientRect();
+        const x = e.clientX - left;
+        const y = e.clientY - top;
 
-        const workedX = Math.floor(position.left);
-        const workedY = Math.floor(position.top);
-
-        const pageX = Math.floor(e.pageX);
-        const pageY = Math.floor(e.pageY);
-
-        const file = Math.floor((pageX - workedX) / SQUARE_SIZE);
-        const rank = 7 - Math.floor((pageY - workedY) / SQUARE_SIZE);
+        const displayFile = Math.floor(x / SQUARE_SIZE);
+        const displayRank = Math.floor(y / SQUARE_SIZE);
+        const { file, rank } = toLogicalSquare(displayFile, displayRank);
 
         // Call backend to convert file/rank to 120-based square index & printable square
         fetch(`http://localhost:5045/api/chess/fr2sq?file=${file}&rank=${rank}`)
@@ -218,34 +220,40 @@ function Board({ pieces, fetchPieces, setModalMsg, onEngineMove, engineTime }: B
 
     return (
         <div
-            className="relative top-5 left-32"
-            style={{ width: BOARD_SIZE, height:BOARD_SIZE }}
-            ref={boardRef}
-            id="Board"
+        ref={boardRef}
+        id="Board"
+        className="relative left-38"
+        style={{ width: BOARD_SIZE, height: BOARD_SIZE }}
         >
-            {generateBoardSquares()}
-            {pieces.map((p, i) => {
-                const rankClass = p.rankClass;
-                const fileClass = p.fileClass;
-                const imgSrc = `/images/${p.imagePath}`;
-                const rank = parseInt(p.rankClass.replace('rank', ''));
-                const file = parseInt(p.fileClass.replace('file', ''));
-                return (
-                    <img
-                        key={i}
-                        src={imgSrc}
-                        className={`Piece ${rankClass} ${fileClass}`}
-                        style={{
-                            width: SQUARE_SIZE,
-                            height: SQUARE_SIZE,
-                            top: `${(8 - rank) * SQUARE_SIZE}px`,
-                            left: `${(file - 1) * SQUARE_SIZE}px`,
-                        }}
-                        alt={p.imagePath}
-                        onClick={(e) => handleClick(e, "Piece")}
-                    />
-                );
-            })}
+        {generateBoardSquares()}
+
+        {pieces.map((p, i) => {
+            // parse the backend‐provided `fileClass` & `rankClass`
+            const fileIdx =
+            parseInt(p.fileClass.replace("file", ""), 10) - 1;
+            const rankIdx =
+            parseInt(p.rankClass.replace("rank", ""), 10) - 1;
+
+            // compute where to draw it on screen
+            const displayFile = flipped ? 7 - fileIdx : fileIdx;
+            const displayRank = flipped ? rankIdx : 7 - rankIdx;
+
+            return (
+            <img
+                key={`pc-${i}-${p.imagePath}`}
+                src={`/images/${p.imagePath}`}
+                className="Piece absolute"
+                style={{
+                width: SQUARE_SIZE,
+                height: SQUARE_SIZE,
+                left: displayFile * SQUARE_SIZE,
+                top: displayRank * SQUARE_SIZE,
+                }}
+                alt={p.imagePath}
+                onClick={(e) => handleClick(e, "Piece")}
+            />
+            );
+        })}
         </div>
     );
 }

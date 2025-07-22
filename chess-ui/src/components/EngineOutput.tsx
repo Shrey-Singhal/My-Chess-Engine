@@ -13,9 +13,11 @@ type EngineOutputProps = {
     onTakeBack: () => void;
     onNewGame: () => void;
     engineStats: EngineStats;
+    setFlipped: React.Dispatch<React.SetStateAction<boolean>>;
+    flipped: boolean;
 }
 
-function EngineOutput({onEngineMove, setEngineTime, engineTime, onTakeBack, onNewGame, engineStats}: EngineOutputProps) {
+function EngineOutput({onEngineMove, setEngineTime, engineTime, onTakeBack, onNewGame, engineStats, flipped, setFlipped}: EngineOutputProps) {
     const buttonClass = "border border-gray-400 bg-gray-100 rounded px-2 py-1 mb-2";
 
 
@@ -55,7 +57,15 @@ function EngineOutput({onEngineMove, setEngineTime, engineTime, onTakeBack, onNe
             >
                 New Game
             </button><br/>
-            <button type="button" className={buttonClass} id="FlipButton">Flip Board</button><br/><br/>
+            <button 
+                type="button" 
+                className={buttonClass} 
+                id="FlipButton"
+                onClick={() => {
+                    setFlipped(prev => !prev);
+                    if (!flipped) onEngineMove(engineTime);
+                }}
+            >Flip Board</button><br/><br/>
             <button 
                 type="button" 
                 className={buttonClass} 

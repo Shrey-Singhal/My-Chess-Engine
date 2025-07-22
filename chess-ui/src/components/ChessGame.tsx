@@ -27,6 +27,8 @@ const ChessGame = () => {
         ordering: "",
         time: "",
     });
+    const [flipped, setFlipped] = useState<boolean>(false);
+
 
     const fetchPieces = () => {
         fetch("http://localhost:5045/api/chess/getpieces")
@@ -79,7 +81,7 @@ const ChessGame = () => {
     return (
         <>
             <SetFen fetchPieces={fetchPieces} />
-            <Board pieces={pieces} fetchPieces={fetchPieces} setModalMsg={setModalMsg} onEngineMove={handleEngineMove} engineTime={engineTime}/>
+            <Board pieces={pieces} fetchPieces={fetchPieces} setModalMsg={setModalMsg} onEngineMove={handleEngineMove} engineTime={engineTime} flipped={flipped}/>
             <ResultModal show={!!modalMsg} onClose={() => setModalMsg(null)}>
               {modalMsg}
             </ResultModal>
@@ -90,6 +92,8 @@ const ChessGame = () => {
                 onTakeBack={handleTakeBack}
                 onNewGame={handleNewGame}
                 engineStats={engineStats}
+                flipped={flipped}
+                setFlipped={setFlipped}
             />
         </>
     );
