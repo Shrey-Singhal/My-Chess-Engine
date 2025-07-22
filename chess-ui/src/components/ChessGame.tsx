@@ -32,7 +32,7 @@ const ChessGame = () => {
 
 
     const fetchPieces = () => {
-        fetch(`${BASE}/getpieces`)
+        fetch(`${BASE}/getpieces`, {credentials: "include"})
         .then((res) => res.json())
         .then((data: GuiPiece[]) => {
             setPieces(data);
@@ -43,6 +43,7 @@ const ChessGame = () => {
     const handleEngineMove = (timeOverride?: number) => {
         fetch(`${BASE}/engineMove`, {
             method: "POST",
+            credentials: "include",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ Time: timeOverride ?? engineTime }),
         })
@@ -51,14 +52,14 @@ const ChessGame = () => {
             fetchPieces();
             if (data.result) setModalMsg(data.result);
 
-            fetch(`${BASE}/enginestats`)
+            fetch(`${BASE}/enginestats`, {credentials: "include"})
             .then(res => res.json())
             .then(setEngineStats);
         });
     };
 
     const handleTakeBack = () => {
-        fetch(`${BASE}/takemove`, { method: "POST" })
+        fetch(`${BASE}/takemove`, { method: "POST", credentials: "include" })
         .then(res => res.json())
         .then(data => {
             setPieces(data.pieces);
@@ -67,7 +68,7 @@ const ChessGame = () => {
     };
 
     const handleNewGame = () => {
-        fetch(`${BASE}/newgame`, { method: "POST" })
+        fetch(`${BASE}/newgame`, { method: "POST", credentials: "include" })
         .then(res => res.json())
         .then(data => {
             setPieces(data.pieces);
@@ -76,8 +77,17 @@ const ChessGame = () => {
     };
 
     useEffect(() => {
-        fetchPieces();
-    }, []);
+        const initGame = async () => {
+            await fetch(`${BASE}/newgame`, {
+                method: "POST",
+                credentials: "include",
+            });
+
+            fetchPieces();
+        };
+
+        initGame();
+    }, []); 
 
     return (
         <>

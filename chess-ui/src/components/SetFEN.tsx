@@ -7,6 +7,7 @@ const SetFEN = ({fetchPieces}: {fetchPieces: () => void}) => {
     const sendFEN = async () => {
         const res = await fetch(`${BASE}/setfen`, {
             method: "POST",
+            credentials: "include",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ fen }),
         });

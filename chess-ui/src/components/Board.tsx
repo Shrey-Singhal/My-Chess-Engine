@@ -85,7 +85,7 @@ function Board({ pieces, fetchPieces, setModalMsg, onEngineMove, engineTime, fli
         const { file, rank } = toLogicalSquare(displayFile, displayRank);
 
         // Call backend to convert file/rank to 120-based square index & printable square
-        fetch(`${BASE}/fr2sq?file=${file}&rank=${rank}`)
+        fetch(`${BASE}/fr2sq?file=${file}&rank=${rank}`, {credentials: "include"})
             .then((res) => res.json())
             .then((data) => {
                 const newSq = data.sq;
@@ -103,6 +103,7 @@ function Board({ pieces, fetchPieces, setModalMsg, onEngineMove, engineTime, fli
                         // Tell backend: set from
                         fetch(`${BASE}/setusermove`, {
                             method: "POST",
+                            credentials: "include",
                             headers: { "Content-Type": "application/json" },
                             body: JSON.stringify(newSq),
                         }).then(() => {
@@ -115,18 +116,19 @@ function Board({ pieces, fetchPieces, setModalMsg, onEngineMove, engineTime, fli
                         // Tell backend: set to
                         fetch(`${BASE}/setusermove`, {
                             method: "POST",
+                            credentials: "include",
                             headers: { "Content-Type": "application/json" },
                             body: JSON.stringify(newSq),
                         })
                         .then(() =>
                             // Now call makemove after both from and to are set
-                            fetch(`${BASE}/makeusermove`, { method: "POST" })
+                            fetch(`${BASE}/makeusermove`, { method: "POST", credentials: "include" })
                         )
                         .then(async (res) => {
                             if (!res.ok) {
                                 //move was invalid
                                 setSelectedSquares({from: null, to: null});
-                                await fetch(`${BASE}/resetusermove`, { method: "POST" }); // reset backend
+                                await fetch(`${BASE}/resetusermove`, { method: "POST", credentials: "include" }); // reset backend
                                 return null;
                             }
                             else {
@@ -148,14 +150,14 @@ function Board({ pieces, fetchPieces, setModalMsg, onEngineMove, engineTime, fli
                             }
 
                             // Reset UI and backend
-                            fetch(`${BASE}/resetusermove`, { method: "POST" })
+                            fetch(`${BASE}/resetusermove`, { method: "POST", credentials: "include" })
                             .then(() => setSelectedSquares({ from: null, to: null }));
 
                             onEngineMove(engineTime);
                         })
                         .catch(() => {
                             setSelectedSquares({ from: null, to: null });
-                            fetch(`${BASE}/resetusermove`, { method: "POST" });
+                            fetch(`${BASE}/resetusermove`, { method: "POST", credentials: "include" });
                         });
                     }
                 }
@@ -170,18 +172,19 @@ function Board({ pieces, fetchPieces, setModalMsg, onEngineMove, engineTime, fli
 
                         fetch(`${BASE}/setusermove`, {
                             method: "POST",
+                            credentials: "include",
                             headers: { "Content-Type": "application/json" },
                             body: JSON.stringify(newSq),
                         })
                         .then(() =>
                             // Now call makemove after both from and to are set
-                            fetch(`${BASE}/makeusermove`, { method: "POST" })
+                            fetch(`${BASE}/makeusermove`, { method: "POST", credentials: "include" })
                         )
                         .then(async (res) => {
                             if (!res.ok) {
                                 //move was invalid
                                 setSelectedSquares({from: null, to: null});
-                                await fetch(`${BASE}/resetusermove`, { method: "POST" }); // reset backend
+                                await fetch(`${BASE}/resetusermove`, { method: "POST", credentials: "include" }); // reset backend
                                 return null;
                             }
                             else {
@@ -203,14 +206,14 @@ function Board({ pieces, fetchPieces, setModalMsg, onEngineMove, engineTime, fli
                             }
 
                             // Reset UI and backend
-                            fetch(`${BASE}/resetusermove`, { method: "POST" })
+                            fetch(`${BASE}/resetusermove`, { method: "POST", credentials: "include" })
                             .then(() => setSelectedSquares({ from: null, to: null }));
 
                             onEngineMove(engineTime);
                         })
                         .catch(() => {
                             setSelectedSquares({ from: null, to: null });
-                            fetch(`${BASE}/resetusermove`, { method: "POST" });
+                            fetch(`${BASE}/resetusermove`, { method: "POST", credentials: "include" });
                         });
                     }
                 }
