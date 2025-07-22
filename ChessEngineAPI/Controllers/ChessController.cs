@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using ChessEngineAPI.Models;
 using ChessEngineAPI.Engine;
 using System.Collections.Concurrent;
+using Microsoft.AspNetCore.Cors;
 
 namespace ChessEngineAPI.Controllers
 {
@@ -11,6 +12,7 @@ namespace ChessEngineAPI.Controllers
     }
     [ApiController]
     [Route("api/chess")]
+    [EnableCors("AllowAll")] 
     public class ChessController(ConcurrentDictionary<string, ChessEngineState> games) : ControllerBase
     {
         private readonly ConcurrentDictionary<string, ChessEngineState> _games = games;
@@ -200,9 +202,9 @@ namespace ChessEngineAPI.Controllers
                     info = "No more moves to take back"
                 });
             }
-            
+
         }
-        
+
         [HttpPost("newgame")]
         public IActionResult NewGame()
         {
@@ -210,7 +212,7 @@ namespace ChessEngineAPI.Controllers
             var _engine = GetEngine();
             _engine.Board.ParseFEN(Defs.START_FEN);    // reset to initial position
             _engine.Search.ClearForSearch();
-            
+
             _games[sessionId] = _engine;
 
             return Ok(new
