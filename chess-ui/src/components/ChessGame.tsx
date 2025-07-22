@@ -17,7 +17,7 @@ type EngineStats = {
     time: string;
 };
 const ChessGame = () => {
-    const BASE = process.env.REACT_APP_API_BASE_URL;
+    const BASE = import.meta.env.VITE_API_BASE_URL as string;
     const [pieces, setPieces] = useState<GuiPiece[]>([]);
     const [modalMsg, setModalMsg] = useState<string | null>(null);
     const [engineTime, setEngineTime] = useState<number>(1000); // default 1s

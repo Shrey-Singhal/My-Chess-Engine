@@ -17,7 +17,7 @@ type BoardProps = {
 
 function Board({ pieces, fetchPieces, setModalMsg, onEngineMove, engineTime, flipped }: BoardProps) {
     //const [pieces, setPieces] = useState<GuiPiece[]>([]);
-    const BASE = process.env.REACT_APP_API_BASE_URL;
+    const BASE = import.meta.env.VITE_API_BASE_URL as string;
     const BOARD_SIZE = 600;
     const SQUARE_SIZE = BOARD_SIZE / 8;
     const [selectedSquares, setSelectedSquares] = useState<{

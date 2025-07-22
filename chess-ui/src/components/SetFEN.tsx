@@ -2,7 +2,7 @@ import { useState } from "react";
 
 const SetFEN = ({fetchPieces}: {fetchPieces: () => void}) => {
     const [fen, setFen] = useState("");
-    const BASE = process.env.REACT_APP_API_BASE_URL;
+    const BASE = import.meta.env.VITE_API_BASE_URL as string;
 
     const sendFEN = async () => {
         const res = await fetch(`${BASE}/setfen`, {
