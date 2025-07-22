@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using ChessEngineAPI.Models;
 using ChessEngineAPI.Engine;
+using System.Collections.Concurrent;
 
 namespace ChessEngineAPI.Controllers
 {
@@ -10,9 +11,18 @@ namespace ChessEngineAPI.Controllers
     }
     [ApiController]
     [Route("api/chess")]
-    public class ChessController(ChessEngineState engine) : ControllerBase
+    public class ChessController(ConcurrentDictionary<string, ChessEngineState> games) : ControllerBase
     {
-        private readonly ChessEngineState _engine = engine;
+        private readonly ConcurrentDictionary<string, ChessEngineState> _games = games;
+
+        // Helper to fetch the current engine or throw
+        private ChessEngineState GetEngine()
+        {
+            var sessionId = HttpContext.Session.Id;
+            if (!_games.TryGetValue(sessionId, out var engine))
+                throw new InvalidOperationException("No game in progress. Call /api/chess/newgame first.");
+            return engine;
+        }
 
         [HttpPost("setfen")]
         // [FromBody] FenRequest requestgets the json body from request and converts it to FenRequest object
@@ -23,6 +33,8 @@ namespace ChessEngineAPI.Controllers
                 return BadRequest("FEN string is required");
             }
             Console.WriteLine("Received FEN: " + request.Fen);
+            var _engine = GetEngine();
+
             _engine.SetPositionFromFEN(request.Fen);
 
             return Ok(new { message = "Fen received and applied", fen = request.Fen });
@@ -31,6 +43,7 @@ namespace ChessEngineAPI.Controllers
         [HttpGet("getpieces")]
         public IActionResult GetPieces()
         {
+            var _engine = GetEngine();
             var pieces = _engine.GetGuiPieces();
             return Ok(pieces);
         }
@@ -95,6 +108,7 @@ namespace ChessEngineAPI.Controllers
         [HttpPost("makeusermove")]
         public IActionResult MakeUserMove()
         {
+            var _engine = GetEngine();
             if (Defs.UserMove.from != Defs.Squares.NO_SQ && Defs.UserMove.to != Defs.Squares.NO_SQ)
             {
                 // Parse the move (using your ParseMove logic)
@@ -126,6 +140,7 @@ namespace ChessEngineAPI.Controllers
         [HttpGet("enginestats")]
         public IActionResult GetEngineStats()
         {
+            var _engine = GetEngine();
             var stats = _engine.Search.GetSearchStats();
             return Ok(stats);
         }
@@ -133,6 +148,7 @@ namespace ChessEngineAPI.Controllers
         [HttpPost("engineMove")]
         public IActionResult EngineMove([FromBody] EngineSearchParams searchParams)
         {
+            var _engine = GetEngine();
             var result = _engine.CheckResult();
             if (result != null)
                 return BadRequest("Game is over.");
@@ -159,11 +175,12 @@ namespace ChessEngineAPI.Controllers
         [HttpPost("takemove")]
         public IActionResult TakeMove()
         {
+            var _engine = GetEngine();
             if (_engine.Board.hisPly > 0)
             {
                 _engine.MoveManager.TakeMove();
                 _engine.Board.ply = 0;
-                
+
 
                 // Refresh the board state
                 return Ok(new
@@ -181,7 +198,7 @@ namespace ChessEngineAPI.Controllers
                     stats = _engine.Search.GetSearchStats(),
                     result = _engine.CheckResult(),
                     info = "No more moves to take back"
-                }); 
+                });
             }
             
         }
@@ -189,9 +206,15 @@ namespace ChessEngineAPI.Controllers
         [HttpPost("newgame")]
         public IActionResult NewGame()
         {
+            var sessionId = HttpContext.Session.Id;
+            var _engine = GetEngine();
             _engine.Board.ParseFEN(Defs.START_FEN);    // reset to initial position
             _engine.Search.ClearForSearch();
-            return Ok(new {
+            
+            _games[sessionId] = _engine;
+
+            return Ok(new
+            {
                 pieces = _engine.GetGuiPieces(),
                 stats = _engine.Search.GetSearchStats(),
             });
