@@ -26,7 +26,11 @@ builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowAll", policy =>
     {
-        policy.AllowAnyOrigin()
+        policy
+            .WithOrigins(
+                "https://my-chess-engine-ui.vercel.app",   // production UI
+                "http://localhost:5173"                   // local dev server
+        )
             .AllowAnyMethod()
             .AllowAnyHeader()
             .AllowCredentials();
