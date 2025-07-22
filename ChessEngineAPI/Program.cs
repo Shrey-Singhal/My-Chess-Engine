@@ -1,6 +1,7 @@
+using System;
+using Microsoft.AspNetCore.Http;
 using ChessEngineAPI.Engine;
-using System.Collections.Concurrent;    // ADD: for ConcurrentDictionary
-
+using System.Collections.Concurrent;
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
@@ -35,6 +36,8 @@ builder.Services.AddSession(options =>
     options.IdleTimeout = TimeSpan.FromHours(1);
     options.Cookie.HttpOnly = true;
     options.Cookie.IsEssential = true;
+    options.Cookie.SameSite     = SameSiteMode.None;
+    options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
 });
 builder.Services.AddSingleton<ConcurrentDictionary<string, ChessEngineState>>();
 
