@@ -113,33 +113,33 @@ namespace ChessEngineAPI.Controllers
         [HttpPost("makeusermove")]
         public IActionResult MakeUserMove()
         {
-            var _engine = GetEngine();
-            if (Defs.UserMove.from != Defs.Squares.NO_SQ && Defs.UserMove.to != Defs.Squares.NO_SQ)
-            {
-                // Parse the move (using your ParseMove logic)
-                int parsed = _engine.Movegen.ParseMove(Defs.UserMove.from, Defs.UserMove.to, _engine.Board, _engine.MoveManager);
-                if (parsed != MoveUtils.NO_MOVE)
-                {
-                    _engine.MoveManager.MakeMove(parsed, _engine.Board); // actually make the move
-                    _engine.Board.PrintBoard();
+            var engine = GetEngine();
 
-                    var result = _engine.CheckResult();
+            var from = Defs.UserMove.from;
+            var to   = Defs.UserMove.to;
+            Defs.UserMove.from = Defs.Squares.NO_SQ;
+            Defs.UserMove.to   = Defs.Squares.NO_SQ;
 
-                    if (result != null)
-                    {
-                        return Ok(new { result });
-                    }
+            if (from == Defs.Squares.NO_SQ || to == Defs.Squares.NO_SQ)
+                return BadRequest("Both 'from' and 'to' must be set");
 
-                    return Ok(new
-                    {
-                        message = "Move made",
-                        fromSq = Defs.SqToPrSq(Defs.UserMove.from),
-                        toSq = Defs.SqToPrSq(Defs.UserMove.to)
-                    });
-                }
+            int parsed = engine.Movegen.ParseMove(from, to, engine.Board, engine.MoveManager);
+            if (parsed == MoveUtils.NO_MOVE)
                 return BadRequest("Illegal move");
-            }
-            return BadRequest("Both 'from' and 'to' must be set");
+
+            engine.MoveManager.MakeMove(parsed, engine.Board);
+
+            var pieces = engine.GetGuiPieces();
+            var result = engine.CheckResult();
+
+            return Ok(new
+            {
+                message = "Move made",
+                fromSq  = Defs.SqToPrSq(from),
+                toSq    = Defs.SqToPrSq(to),
+                pieces,       // send the updated GUI pieces
+                result
+            });
         }
 
         [HttpGet("enginestats")]
@@ -212,7 +212,7 @@ namespace ChessEngineAPI.Controllers
         public IActionResult NewGame()
         {
             var sessionId = HttpContext.Session.Id;
-            var _engine = GetEngine();
+            var _engine = new ChessEngineState();
             _engine.Board.ParseFEN(Defs.START_FEN);    // reset to initial position
             _engine.Search.ClearForSearch();
 

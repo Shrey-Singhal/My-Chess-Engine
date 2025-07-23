@@ -1,4 +1,4 @@
-import React, { useRef, useState, type JSX } from "react";
+import React, { useRef, useState, type Dispatch, type JSX, type SetStateAction } from "react";
 
 type GuiPiece = {
     fileClass: string;
@@ -8,14 +8,21 @@ type GuiPiece = {
 
 type BoardProps = {
     pieces: GuiPiece[];
-    fetchPieces: () => void;
+    setPieces: Dispatch<SetStateAction<GuiPiece[]>>;
     setModalMsg: (msg: string | null) => void;
-    onEngineMove: (t: number)=> void;
+    onEngineMove: (t: number) => void;
     engineTime: number;
     flipped: boolean;
-}
+};
 
-function Board({ pieces, fetchPieces, setModalMsg, onEngineMove, engineTime, flipped }: BoardProps) {
+function Board({
+    pieces,
+    setPieces,
+    setModalMsg,
+    onEngineMove,
+    engineTime,
+    flipped,
+}: BoardProps) {
     //const [pieces, setPieces] = useState<GuiPiece[]>([]);
     const BASE = import.meta.env.VITE_API_BASE_URL as string;
     const BOARD_SIZE = 600;
@@ -24,7 +31,7 @@ function Board({ pieces, fetchPieces, setModalMsg, onEngineMove, engineTime, fli
         from: { file: number; rank: number } | null;
         to: { file: number; rank: number } | null;
     }>({ from: null, to: null });
-    
+
     //const [gameStatus, setGameStatus] = useState<string | null>(null);
 
     function toLogicalSquare(displayFile: number, displayRank: number) {
@@ -33,7 +40,6 @@ function Board({ pieces, fetchPieces, setModalMsg, onEngineMove, engineTime, fli
         return { file, rank };
     }
 
-
     const boardRef = useRef<HTMLDivElement>(null);
 
     //render squares
@@ -41,9 +47,11 @@ function Board({ pieces, fetchPieces, setModalMsg, onEngineMove, engineTime, fli
         const squares: JSX.Element[] = [];
 
         for (let displayRank = 0; displayRank < 8; displayRank++) {
-
             for (let displayFile = 0; displayFile < 8; displayFile++) {
-                const { file, rank } = toLogicalSquare(displayFile, displayRank);
+                const { file, rank } = toLogicalSquare(
+                    displayFile,
+                    displayRank
+                );
 
                 const isLight = (file + rank) % 2 === 0;
                 const isSelected =
@@ -57,13 +65,13 @@ function Board({ pieces, fetchPieces, setModalMsg, onEngineMove, engineTime, fli
                     <div
                         key={`sq-${displayRank}-${displayFile}`}
                         className={`absolute ${isLight ? "Light" : "Dark"} ${
-                        isSelected ? "SqSelected" : ""
+                            isSelected ? "SqSelected" : ""
                         }`}
                         style={{
-                        width: SQUARE_SIZE,
-                        height: SQUARE_SIZE,
-                        top: displayRank * SQUARE_SIZE,
-                        left: displayFile * SQUARE_SIZE,
+                            width: SQUARE_SIZE,
+                            height: SQUARE_SIZE,
+                            top: displayRank * SQUARE_SIZE,
+                            left: displayFile * SQUARE_SIZE,
                         }}
                         onClick={(e) => handleClick(e, "Square")}
                     />
@@ -84,180 +92,144 @@ function Board({ pieces, fetchPieces, setModalMsg, onEngineMove, engineTime, fli
         const displayRank = Math.floor(y / SQUARE_SIZE);
         const { file, rank } = toLogicalSquare(displayFile, displayRank);
 
-        // Call backend to convert file/rank to 120-based square index & printable square
-        fetch(`${BASE}/fr2sq?file=${file}&rank=${rank}`, {credentials: "include"})
+        // get the 0–119 index and printable square
+        fetch(`${BASE}/fr2sq?file=${file}&rank=${rank}`, {
+            credentials: "include",
+        })
             .then((res) => res.json())
             .then((data) => {
                 const newSq = data.sq;
-                const prSq = data.prSq; // Algebraic (like "e4", "d5")
-
-                // Print the selected square every time
+                const prSq = data.prSq;
                 console.log(`Selected square: ${prSq} (${file}, ${rank})`);
 
-                // PIECE CLICK
-                if (type === "Piece") {
-                    if (!selectedSquares.from) {
-                        // First piece click: set from
-                        setSelectedSquares({ from: { file, rank }, to: null });
-
-                        // Tell backend: set from
-                        fetch(`${BASE}/setusermove`, {
-                            method: "POST",
-                            credentials: "include",
-                            headers: { "Content-Type": "application/json" },
-                            body: JSON.stringify(newSq),
-                        }).then(() => {
-                            console.log(`From square set to ${prSq}`);
-                        });
-                    } else {
-                        // Second piece click: set to
-                        setSelectedSquares({ from: selectedSquares.from, to: { file, rank } });
-
-                        // Tell backend: set to
-                        fetch(`${BASE}/setusermove`, {
-                            method: "POST",
-                            credentials: "include",
-                            headers: { "Content-Type": "application/json" },
-                            body: JSON.stringify(newSq),
-                        })
-                        .then(() =>
-                            // Now call makemove after both from and to are set
-                            fetch(`${BASE}/makeusermove`, { method: "POST", credentials: "include" })
-                        )
-                        .then(async (res) => {
-                            if (!res.ok) {
-                                //move was invalid
-                                setSelectedSquares({from: null, to: null});
-                                await fetch(`${BASE}/resetusermove`, { method: "POST", credentials: "include" }); // reset backend
-                                return null;
-                            }
-                            else {
-                                fetchPieces();
-                            }
-                            return res.json();
-                        })                        
-                        
-                        .then((moveData) => {
-                            if (!moveData) return;
-
-                            if (moveData.result) {
-                                setModalMsg(moveData.result);
-                            }
-
-                            // Print move as algebraic: get fromSq and toSq from backend if available
-                            if (moveData.fromSq && moveData.toSq) {
-                                console.log(`Move made: ${moveData.fromSq} -> ${moveData.toSq}`);
-                            }
-
-                            // Reset UI and backend
-                            fetch(`${BASE}/resetusermove`, { method: "POST", credentials: "include" })
-                            .then(() => setSelectedSquares({ from: null, to: null }));
-
-                            onEngineMove(engineTime);
-                        })
-                        .catch(() => {
-                            setSelectedSquares({ from: null, to: null });
-                            fetch(`${BASE}/resetusermove`, { method: "POST", credentials: "include" });
-                        });
-                    }
+                // --- first click (set from) ---
+                if (type === "Piece" && !selectedSquares.from) {
+                    setSelectedSquares({ from: { file, rank }, to: null });
+                    return fetch(`${BASE}/setusermove`, {
+                        method: "POST",
+                        credentials: "include",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify(newSq),
+                    });
                 }
 
-                // SQUARE CLICK
-                if (type === "Square") {
-                    if (selectedSquares.from) {
-                        setSelectedSquares({
-                            from: selectedSquares.from,
-                            to: { file, rank },
-                        });
+                // --- second click (set to + make move) ---
+                if (
+                    (type === "Piece" && selectedSquares.from) ||
+                    (type === "Square" && selectedSquares.from)
+                ) {
+                    // set ‘to’
+                    setSelectedSquares({
+                        from: selectedSquares.from!,
+                        to: { file, rank },
+                    });
 
+                    // 1) set the to‐square on the server
+                    return (
                         fetch(`${BASE}/setusermove`, {
                             method: "POST",
                             credentials: "include",
                             headers: { "Content-Type": "application/json" },
                             body: JSON.stringify(newSq),
                         })
-                        .then(() =>
-                            // Now call makemove after both from and to are set
-                            fetch(`${BASE}/makeusermove`, { method: "POST", credentials: "include" })
-                        )
-                        .then(async (res) => {
-                            if (!res.ok) {
-                                //move was invalid
-                                setSelectedSquares({from: null, to: null});
-                                await fetch(`${BASE}/resetusermove`, { method: "POST", credentials: "include" }); // reset backend
-                                return null;
-                            }
-                            else {
-                                fetchPieces();
-                            }
-                            return res.json();
-                        })
-                        
-                        .then((moveData) => {
-                            if (!moveData) return;
+                            // 2) then immediately request makeusermove
+                            .then(() =>
+                                fetch(`${BASE}/makeusermove`, {
+                                    method: "POST",
+                                    credentials: "include",
+                                })
+                            )
+                            // 3) parse JSON or throw if not ok
+                            .then((res) => {
+                                if (!res.ok) throw new Error("Move failed");
+                                return res.json();
+                            })
+                            // 4) handle the response: update board, modal, reset state
+                            .then(
+                                (moveData: {
+                                    message: string;
+                                    fromSq: string;
+                                    toSq: string;
+                                    pieces: GuiPiece[];
+                                    result?: string;
+                                }) => {
+                                    // update board immediately
+                                    setPieces(moveData.pieces);
 
-                            if (moveData.result) {
-                                setModalMsg(moveData.result);
-                            }
+                                    // show any result (check/mate)
+                                    if (moveData.result) {
+                                        setModalMsg(moveData.result);
+                                    }
 
-                            // Print move as algebraic: get fromSq and toSq from backend if available
-                            if (moveData.fromSq && moveData.toSq) {
-                                console.log(`Move made: ${moveData.fromSq} -> ${moveData.toSq}`);
-                            }
+                                    // clear UI selection
+                                    setSelectedSquares({
+                                        from: null,
+                                        to: null,
+                                    });
 
-                            // Reset UI and backend
-                            fetch(`${BASE}/resetusermove`, { method: "POST", credentials: "include" })
-                            .then(() => setSelectedSquares({ from: null, to: null }));
+                                    // reset backend userMove
+                                    fetch(`${BASE}/resetusermove`, {
+                                        method: "POST",
+                                        credentials: "include",
+                                    });
 
-                            onEngineMove(engineTime);
-                        })
-                        .catch(() => {
-                            setSelectedSquares({ from: null, to: null });
-                            fetch(`${BASE}/resetusermove`, { method: "POST", credentials: "include" });
-                        });
-                    }
+                                    // trigger engine move
+                                    onEngineMove(engineTime);
+                                    return undefined;
+                                }
+                            )
+                            // 5) catch errors, reset UI & backend
+                            .catch((err) => {
+                                console.error("Error making move:", err);
+                                setSelectedSquares({ from: null, to: null });
+                                fetch(`${BASE}/resetusermove`, {
+                                    method: "POST",
+                                    credentials: "include",
+                                });
+                                return undefined;
+                            })
+                    );
                 }
             })
             .catch((err) => console.error("Error fetching square:", err));
     };
 
-
     return (
         <div
-        ref={boardRef}
-        id="Board"
-        className="relative left-38"
-        style={{ width: BOARD_SIZE, height: BOARD_SIZE }}
+            ref={boardRef}
+            id="Board"
+            className="relative left-38"
+            style={{ width: BOARD_SIZE, height: BOARD_SIZE }}
         >
-        {generateBoardSquares()}
+            {generateBoardSquares()}
 
-        {pieces.map((p, i) => {
-            // parse the backend‐provided `fileClass` & `rankClass`
-            const fileIdx =
-            parseInt(p.fileClass.replace("file", ""), 10) - 1;
-            const rankIdx =
-            parseInt(p.rankClass.replace("rank", ""), 10) - 1;
+            {pieces.map((p, i) => {
+                // parse the backend‐provided `fileClass` & `rankClass`
+                const fileIdx =
+                    parseInt(p.fileClass.replace("file", ""), 10) - 1;
+                const rankIdx =
+                    parseInt(p.rankClass.replace("rank", ""), 10) - 1;
 
-            // compute where to draw it on screen
-            const displayFile = flipped ? 7 - fileIdx : fileIdx;
-            const displayRank = flipped ? rankIdx : 7 - rankIdx;
+                // compute where to draw it on screen
+                const displayFile = flipped ? 7 - fileIdx : fileIdx;
+                const displayRank = flipped ? rankIdx : 7 - rankIdx;
 
-            return (
-            <img
-                key={`pc-${i}-${p.imagePath}`}
-                src={`/images/${p.imagePath}`}
-                className="Piece absolute"
-                style={{
-                width: SQUARE_SIZE,
-                height: SQUARE_SIZE,
-                left: displayFile * SQUARE_SIZE,
-                top: displayRank * SQUARE_SIZE,
-                }}
-                alt={p.imagePath}
-                onClick={(e) => handleClick(e, "Piece")}
-            />
-            );
-        })}
+                return (
+                    <img
+                        key={`pc-${i}-${p.imagePath}`}
+                        src={`/images/${p.imagePath}`}
+                        className="Piece absolute"
+                        style={{
+                            width: SQUARE_SIZE,
+                            height: SQUARE_SIZE,
+                            left: displayFile * SQUARE_SIZE,
+                            top: displayRank * SQUARE_SIZE,
+                        }}
+                        alt={p.imagePath}
+                        onClick={(e) => handleClick(e, "Piece")}
+                    />
+                );
+            })}
         </div>
     );
 }

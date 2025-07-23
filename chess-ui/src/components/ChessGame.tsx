@@ -49,7 +49,7 @@ const ChessGame = () => {
         })
         .then(res => res.json())
         .then((data) => {
-            fetchPieces();
+            setPieces(data.pieces);
             if (data.result) setModalMsg(data.result);
 
             fetch(`${BASE}/enginestats`, {credentials: "include"})
@@ -92,7 +92,7 @@ const ChessGame = () => {
     return (
         <>
             <SetFEN fetchPieces={fetchPieces} />
-            <Board pieces={pieces} fetchPieces={fetchPieces} setModalMsg={setModalMsg} onEngineMove={handleEngineMove} engineTime={engineTime} flipped={flipped}/>
+            <Board pieces={pieces} setPieces={setPieces} setModalMsg={setModalMsg} onEngineMove={handleEngineMove} engineTime={engineTime} flipped={flipped}/>
             <ResultModal show={!!modalMsg} onClose={() => setModalMsg(null)}>
               {modalMsg}
             </ResultModal>
