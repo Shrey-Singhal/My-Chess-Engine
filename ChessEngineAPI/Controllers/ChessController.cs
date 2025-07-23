@@ -12,7 +12,6 @@ namespace ChessEngineAPI.Controllers
     }
     [ApiController]
     [Route("api/chess")]
-    [EnableCors("AllowAll")] 
     public class ChessController(ConcurrentDictionary<string, ChessEngineState> games) : ControllerBase
     {
         private readonly ConcurrentDictionary<string, ChessEngineState> _games = games;
