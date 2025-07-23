@@ -49,6 +49,7 @@ const ChessGame = () => {
         })
         .then(res => res.json())
         .then((data) => {
+            console.log("engineMove response:", data);
             setPieces(data.pieces);
             if (data.result) setModalMsg(data.result);
 

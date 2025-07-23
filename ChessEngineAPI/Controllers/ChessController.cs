@@ -168,6 +168,7 @@ namespace ChessEngineAPI.Controllers
                 return BadRequest("No valid move found");
 
             _engine.MoveManager.MakeMove(bestMove, _engine.Board);
+            _engine.Board.PrintBoard();
 
             return Ok(new
             {
