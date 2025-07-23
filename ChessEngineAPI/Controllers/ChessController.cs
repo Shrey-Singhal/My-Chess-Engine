@@ -209,7 +209,7 @@ namespace ChessEngineAPI.Controllers
         public IActionResult NewGame()
         {
             var sessionId = HttpContext.Session.Id;
-            var _engine = GetEngine();
+            var _engine = new ChessEngineState();
             _engine.Board.ParseFEN(Defs.START_FEN);    // reset to initial position
             _engine.Search.ClearForSearch();
 
