@@ -17,28 +17,23 @@ namespace ChessEngineAPI.Controllers
         private readonly ConcurrentDictionary<string, ChessEngineState> _games = games;
 
         // Helper to fetch the current engine or throw
-        private ChessEngineState GetEngine()
+        private ChessEngineState LookupEngine(string gameId)
         {
-            var id = HttpContext.Session.Id;
-            return _games.GetOrAdd(id, _ =>
-            {
-                var e = new ChessEngineState();
-                e.Board.ParseFEN(Defs.START_FEN);
-                e.Search.ClearForSearch();
-                return e;
-            });
+            if (!_games.TryGetValue(gameId, out var engine))
+                throw new KeyNotFoundException("Invalid gameId");
+            return engine;
         }
 
         [HttpPost("setfen")]
         // [FromBody] FenRequest requestgets the json body from request and converts it to FenRequest object
-        public IActionResult SetFEN([FromBody] FenRequest request)
+        public IActionResult SetFEN([FromBody] FenRequest request, [FromQuery] string gameId)
         {
             if (string.IsNullOrWhiteSpace(request.Fen))
             {
                 return BadRequest("FEN string is required");
             }
             Console.WriteLine("Received FEN: " + request.Fen);
-            var _engine = GetEngine();
+            var _engine = LookupEngine(gameId);
 
             _engine.SetPositionFromFEN(request.Fen);
 
@@ -46,9 +41,9 @@ namespace ChessEngineAPI.Controllers
         }
 
         [HttpGet("getpieces")]
-        public IActionResult GetPieces()
+        public IActionResult GetPieces([FromQuery] string gameId)
         {
-            var _engine = GetEngine();
+            var _engine = LookupEngine(gameId);
             var pieces = _engine.GetGuiPieces();
             return Ok(pieces);
         }
@@ -62,23 +57,29 @@ namespace ChessEngineAPI.Controllers
         }
 
         [HttpPost("setusermove")]
-        public IActionResult SetUserMove([FromBody] int sq)
+        public IActionResult SetUserMove(
+        [FromQuery] string gameId,
+        [FromBody] int sq
+        )
         {
-            if (Defs.UserMove.from == Defs.Squares.NO_SQ)
+            // 1) grab the right engine
+            var engine = LookupEngine(gameId);
+
+            // 2) initialize or complete the pending move
+            if (engine.PendingFrom == Defs.Squares.NO_SQ)
             {
-                Defs.UserMove.from = sq;
+                engine.PendingFrom = sq;
                 return Ok(new
                 {
                     message = "from set",
-                    fromSq = Defs.SqToPrSq(Defs.UserMove.from)
+                    fromSq = Defs.SqToPrSq(engine.PendingFrom)
                 });
             }
             else
             {
-                Defs.UserMove.to = sq;
-
-                var fromPrSq = Defs.SqToPrSq(Defs.UserMove.from);
-                var toPrSq = Defs.SqToPrSq(Defs.UserMove.to);
+                engine.PendingTo = sq;
+                var fromPrSq = Defs.SqToPrSq(engine.PendingFrom);
+                var toPrSq = Defs.SqToPrSq(engine.PendingTo);
 
                 return Ok(new
                 {
@@ -89,36 +90,17 @@ namespace ChessEngineAPI.Controllers
             }
         }
 
-        [HttpGet("getusermove")]
-        public IActionResult GetUserMove()
-        {
-            return Ok(new
-            {
-                from = Defs.UserMove.from,
-                to = Defs.UserMove.to,
-                fromSq = Defs.UserMove.from == Defs.Squares.NO_SQ ? null : Defs.SqToPrSq(Defs.UserMove.from),
-                toSq = Defs.UserMove.to == Defs.Squares.NO_SQ ? null : Defs.SqToPrSq(Defs.UserMove.to)
-            });
-        }
-
-        [HttpPost("resetusermove")]
-        public IActionResult ResetUserMove()
-        {
-            Defs.UserMove.from = Defs.Squares.NO_SQ;
-            Defs.UserMove.to = Defs.Squares.NO_SQ;
-
-            return Ok("user move reset");
-        }
-
         [HttpPost("makeusermove")]
-        public IActionResult MakeUserMove()
+        public IActionResult MakeUserMove([FromQuery] string gameId)
         {
-            var engine = GetEngine();
+            var engine = LookupEngine(gameId);
 
-            var from = Defs.UserMove.from;
-            var to   = Defs.UserMove.to;
-            Defs.UserMove.from = Defs.Squares.NO_SQ;
-            Defs.UserMove.to   = Defs.Squares.NO_SQ;
+            var from = engine.PendingFrom;
+            var to = engine.PendingTo;
+
+            // reset them immediately, so next move always starts fresh
+            engine.PendingFrom = Defs.Squares.NO_SQ;
+            engine.PendingTo = Defs.Squares.NO_SQ;
 
             if (from == Defs.Squares.NO_SQ || to == Defs.Squares.NO_SQ)
                 return BadRequest("Both 'from' and 'to' must be set");
@@ -135,25 +117,25 @@ namespace ChessEngineAPI.Controllers
             return Ok(new
             {
                 message = "Move made",
-                fromSq  = Defs.SqToPrSq(from),
-                toSq    = Defs.SqToPrSq(to),
-                pieces,       // send the updated GUI pieces
+                fromSq = Defs.SqToPrSq(from),
+                toSq = Defs.SqToPrSq(to),
+                pieces,
                 result
             });
         }
 
         [HttpGet("enginestats")]
-        public IActionResult GetEngineStats()
+        public IActionResult GetEngineStats([FromQuery] string gameId)
         {
-            var _engine = GetEngine();
+            var _engine = LookupEngine(gameId);
             var stats = _engine.Search.GetSearchStats();
             return Ok(stats);
         }
 
         [HttpPost("engineMove")]
-        public IActionResult EngineMove([FromBody] EngineSearchParams searchParams)
+        public IActionResult EngineMove([FromBody] EngineSearchParams searchParams, [FromQuery] string gameId)
         {
-            var _engine = GetEngine();
+            var _engine = LookupEngine(gameId);
             var result = _engine.CheckResult();
             if (result != null)
                 return BadRequest("Game is over.");
@@ -179,9 +161,9 @@ namespace ChessEngineAPI.Controllers
         }
 
         [HttpPost("takemove")]
-        public IActionResult TakeMove()
+        public IActionResult TakeMove([FromQuery] string gameId)
         {
-            var _engine = GetEngine();
+            var _engine = LookupEngine(gameId);
             if (_engine.Board.hisPly > 0)
             {
                 _engine.MoveManager.TakeMove();
@@ -212,15 +194,16 @@ namespace ChessEngineAPI.Controllers
         [HttpPost("newgame")]
         public IActionResult NewGame()
         {
-            var sessionId = HttpContext.Session.Id;
+            var gameId = Guid.NewGuid().ToString();
             var _engine = new ChessEngineState();
             _engine.Board.ParseFEN(Defs.START_FEN);    // reset to initial position
             _engine.Search.ClearForSearch();
 
-            _games[sessionId] = _engine;
+            _games[gameId] = _engine;
 
             return Ok(new
             {
+                gameId,
                 pieces = _engine.GetGuiPieces(),
             });
         }

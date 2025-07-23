@@ -9,6 +9,8 @@ namespace ChessEngineAPI.Engine
         public MoveManager MoveManager { get; }
         public PerfTesting PerfTesting { get; }
         public Search Search { get; }
+        public int PendingFrom { get; set; } = Defs.Squares.NO_SQ;
+        public int PendingTo { get; set; } = Defs.Squares.NO_SQ;
 
         public ChessEngineState()
         {

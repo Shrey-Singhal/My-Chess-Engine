@@ -1,11 +1,11 @@
 import { useState } from "react";
 
-const SetFEN = ({fetchPieces}: {fetchPieces: () => void}) => {
+const SetFEN = ({fetchPieces, gameId}: {fetchPieces: () => void; gameId: string;}) => {
     const [fen, setFen] = useState("");
     const BASE = import.meta.env.VITE_API_BASE_URL as string;
 
     const sendFEN = async () => {
-        const res = await fetch(`${BASE}/setfen`, {
+        const res = await fetch(`${BASE}/setfen?gameId=${gameId}`, {
             method: "POST",
             credentials: "include",
             headers: { "Content-Type": "application/json" },
