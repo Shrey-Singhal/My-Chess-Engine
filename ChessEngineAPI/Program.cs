@@ -7,21 +7,18 @@ using Microsoft.Extensions.DependencyInjection;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// CORS: explicit UI & localhost, with credentials
-builder.Services.AddCors(options =>
-{
-    options.AddPolicy("AllowAll", policy =>
-    {
-        policy
-          .WithOrigins(
-            "https://my-chess-engine-ui.vercel.app",
-            "http://localhost:5173"
-          )
-          .AllowAnyMethod()
-          .AllowAnyHeader()
-          .AllowCredentials();
-    });
-});
+// default CORS policy
+builder.Services.AddCors(o => o.AddDefaultPolicy(policy =>
+    policy
+      .WithOrigins(
+        "https://my-chess-engine-ui.vercel.app",
+        "http://localhost:5173"
+      )
+      .AllowAnyMethod()
+      .AllowAnyHeader()
+      .AllowCredentials()
+));
+
 
 // Session + in‑memory games per session
 builder.Services.AddDistributedMemoryCache();
@@ -52,8 +49,8 @@ var app = builder.Build();
 // Must be before UseCors & MapControllers when using endpoint routing
 app.UseRouting();
 
-// Apply CORS to all endpoints
-app.UseCors("AllowAll");
+// Apply CORS
+app.UseCors();
 
 // Now sessions can read/write the cookie that CORS just allowed
 app.UseSession();
