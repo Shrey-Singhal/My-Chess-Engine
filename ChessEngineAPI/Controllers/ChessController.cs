@@ -19,10 +19,14 @@ namespace ChessEngineAPI.Controllers
         // Helper to fetch the current engine or throw
         private ChessEngineState GetEngine()
         {
-            var sessionId = HttpContext.Session.Id;
-            if (!_games.TryGetValue(sessionId, out var engine))
-                throw new InvalidOperationException("No game in progress. Call /api/chess/newgame first.");
-            return engine;
+            var id = HttpContext.Session.Id;
+            return _games.GetOrAdd(id, _ =>
+            {
+                var e = new ChessEngineState();
+                e.Board.ParseFEN(Defs.START_FEN);
+                e.Search.ClearForSearch();
+                return e;
+            });
         }
 
         [HttpPost("setfen")]
@@ -208,7 +212,7 @@ namespace ChessEngineAPI.Controllers
         public IActionResult NewGame()
         {
             var sessionId = HttpContext.Session.Id;
-            var _engine = new ChessEngineState();
+            var _engine = GetEngine();
             _engine.Board.ParseFEN(Defs.START_FEN);    // reset to initial position
             _engine.Search.ClearForSearch();
 
