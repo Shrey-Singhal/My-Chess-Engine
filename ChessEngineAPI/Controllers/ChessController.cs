@@ -221,7 +221,6 @@ namespace ChessEngineAPI.Controllers
             return Ok(new
             {
                 pieces = _engine.GetGuiPieces(),
-                stats = _engine.Search.GetSearchStats(),
             });
         }
 
